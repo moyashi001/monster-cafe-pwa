@@ -4,7 +4,7 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v2';
+const CACHE_NAME = 'monster-cafe-v4';
 
 const PRECACHE_ASSETS = [
   "./",
@@ -17,9 +17,8 @@ const PRECACHE_ASSETS = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./images/bg_menu.png",
-  "./images/bg_seal_01.png",
-  "./images/bg_seal_02.png",
-  "./images/bg_seal_03.png",
+  "./images/bg_seal_boy.png",
+  "./images/bg_seal_girl.png",
   "./images/car_01.png",
   "./images/car_01_shadow.png",
   "./images/car_02.png",
@@ -40,7 +39,28 @@ const PRECACHE_ASSETS = [
   "./images/car_09_shadow.png",
   "./images/car_10.png",
   "./images/car_10_shadow.png",
+  "./images/car_11.png",
+  "./images/car_11_shadow.png",
+  "./images/car_12.png",
+  "./images/car_12_shadow.png",
+  "./images/car_13.png",
+  "./images/car_13_shadow.png",
+  "./images/car_14.png",
+  "./images/car_14_shadow.png",
+  "./images/car_15.png",
+  "./images/car_15_shadow.png",
+  "./images/car_16.png",
+  "./images/car_16_shadow.png",
+  "./images/car_17.png",
+  "./images/car_17_shadow.png",
+  "./images/car_18.png",
+  "./images/car_18_shadow.png",
+  "./images/car_19.png",
+  "./images/car_19_shadow.png",
+  "./images/car_20.png",
+  "./images/car_20_shadow.png",
   "./images/food_aburasoba.png",
+  "./images/food_bomb.png",
   "./images/monster_angry.png",
   "./images/monster_eat.png",
   "./images/monster_happy.png",

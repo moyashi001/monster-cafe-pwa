@@ -66,6 +66,16 @@
   .btn-back{ background:linear-gradient(180deg,#b7b7c9,#767695); }
   #title{ text-align:center; font-size:clamp(14px,3.6vw,20px); color:var(--ink); padding:2px 6px 0; font-weight:bold; flex:0 0 auto; }
 
+  /* ---------------- sticker progress badge (shared) ---------------- */
+  .sticker-progress{
+    display:flex; align-items:center; gap:6px; font-size:clamp(10px,2.6vw,13px); font-weight:bold;
+    color:var(--ink); background:rgba(255,255,255,.6); border-radius:16px; padding:5px 10px;
+    box-shadow:0 2px 0 rgba(0,0,0,.1); white-space:nowrap;
+  }
+  .sticker-progress .dots{ display:flex; gap:3px; }
+  .sticker-progress .dot{ width:9px; height:9px; border-radius:50%; background:rgba(122,46,26,.22); flex:0 0 auto; }
+  .sticker-progress .dot.filled{ background:var(--mustard); box-shadow:0 0 0 1px rgba(122,46,26,.3); }
+
   /* ---------------- speech bubble (shared) ---------------- */
   .speech-bubble{
     position:relative; flex:0 0 auto; background:var(--cream); border:4px solid var(--red); border-radius:24px;
@@ -118,6 +128,21 @@
     100%{ transform:scale(1) rotate(0deg) translateY(-30px); opacity:0; }
   }
 
+  .result-mark{
+    position:fixed; left:50%; top:36%; transform:translate(-50%,-50%) scale(0);
+    font-size:clamp(120px,40vw,260px); font-weight:900; line-height:1;
+    pointer-events:none; z-index:250;
+    animation:resultMarkPop .7s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .result-mark.correct{ color:#e63946; -webkit-text-stroke:8px #fff; filter:drop-shadow(0 6px 4px rgba(0,0,0,.25)); }
+  .result-mark.wrong{ color:#2b6fce; -webkit-text-stroke:8px #fff; filter:drop-shadow(0 6px 4px rgba(0,0,0,.25)); }
+  @keyframes resultMarkPop{
+    0%{ transform:translate(-50%,-50%) scale(0) rotate(-15deg); opacity:0; }
+    45%{ transform:translate(-50%,-50%) scale(1.15) rotate(5deg); opacity:1; }
+    70%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:1; }
+    100%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:0; }
+  }
+
   /* ================= MENU ================= */
   #screen-menu{
     align-items:center; justify-content:center; gap:clamp(10px,3vh,22px); padding:16px;
@@ -127,10 +152,6 @@
     font-size:clamp(26px,7.5vw,44px); font-weight:bold; color:#fff; text-align:center;
     text-shadow:0 3px 0 rgba(0,0,0,.3), 0 0 14px rgba(0,0,0,.5); letter-spacing:2px;
   }
-  #satiety-wrap{ width:min(88vw,420px); display:flex; align-items:center; gap:8px; }
-  #satiety-label{ font-size:clamp(11px,2.8vw,14px); font-weight:bold; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.3); white-space:nowrap; }
-  #satiety-bar{ flex:1; height:18px; background:rgba(0,0,0,.35); border-radius:10px; overflow:hidden; border:2px solid #fff; }
-  #satiety-fill{ height:100%; width:0%; background:linear-gradient(90deg,#ffce4a,var(--red)); transition:width .5s ease; }
   .menu-btn{
     width:min(88vw,460px); padding:clamp(14px,3.2vh,22px) 20px; border:none; border-radius:26px;
     font-family:inherit; font-weight:bold; font-size:clamp(15px,4.2vw,22px); color:#fff; text-align:center;
@@ -143,6 +164,16 @@
   #btn-car{ background:linear-gradient(180deg,#ffb066,#e2661a); }
 
   /* ================= GAME 1: counting (conveyor + crow) ================= */
+  .remaining-badge{
+    flex:0 0 auto; align-self:center; display:flex; align-items:baseline; gap:4px;
+    background:rgba(255,255,255,.8); border:3px solid var(--red); border-radius:22px;
+    padding:1px 16px; margin-top:2px; box-shadow:0 3px 0 rgba(0,0,0,.15);
+  }
+  .remaining-badge .remaining-label{ font-size:clamp(11px,2.8vw,14px); font-weight:bold; color:var(--ink); }
+  .remaining-badge .remaining-num{ font-size:clamp(30px,9vw,48px); font-weight:900; color:var(--red); line-height:1.1; }
+  .remaining-badge .remaining-unit{ font-size:clamp(13px,3.2vw,16px); font-weight:bold; color:var(--ink); }
+  .remaining-badge.pulse{ animation:remainingPulse .4s ease; }
+  @keyframes remainingPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.18); } }
   #screen-count .body-area{ flex:1 1 auto; position:relative; display:flex; flex-direction:column; min-height:0; }
   .monster-area1{ position:relative; flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; padding-top:2px; }
   .monster-img{ width:clamp(120px,32vw,190px); height:auto; object-fit:contain; }
@@ -160,13 +191,18 @@
     animation:beltMove 1s linear infinite;
     box-shadow:0 4px 0 rgba(0,0,0,.2);
   }
-  @keyframes beltMove{ from{ background-position:0 0; } to{ background-position:-48px 0; } }
+  @keyframes beltMove{ from{ background-position:0 0; } to{ background-position:48px 0; } }
   #beltItems{ position:absolute; inset:0; }
   .belt-item{
     position:absolute; width:clamp(56px,15vw,86px); height:auto; touch-action:none; cursor:grab; will-change:transform;
     filter:drop-shadow(0 4px 4px rgba(0,0,0,.25));
   }
   .belt-item.dragging{ cursor:grabbing; z-index:80; filter:drop-shadow(0 8px 6px rgba(0,0,0,.35)); }
+  .belt-item-bomb{ animation:bombPulse .5s ease-in-out infinite; }
+  @keyframes bombPulse{
+    0%,100%{ filter:drop-shadow(0 4px 4px rgba(0,0,0,.25)) brightness(1); }
+    50%{ filter:drop-shadow(0 4px 10px rgba(255,60,0,.7)) brightness(1.18); }
+  }
 
   .crow{ position:fixed; top:0; left:0; width:64px; height:50px; z-index:120; pointer-events:none; }
   .crow-body{ position:absolute; left:18%; top:20%; width:64%; height:60%; background:#2b2b30; border-radius:50% 50% 40% 40%; }
@@ -200,10 +236,15 @@
   }
 
   /* ================= SEAL ALBUM ================= */
-  #screen-seal .seal-bg-buttons{ flex:0 0 auto; display:flex; gap:8px; justify-content:center; padding:6px 0; }
-  .seal-bg-btn{ border:3px solid #fff; border-radius:14px; width:44px; height:44px; padding:0; overflow:hidden; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.2); }
-  .seal-bg-btn img{ width:100%; height:100%; object-fit:cover; }
-  .seal-bg-btn.selected{ border-color:var(--red); transform:scale(1.1); }
+  #screen-seal .seal-bg-buttons{ flex:0 0 auto; display:flex; gap:10px; justify-content:center; padding:6px 0; }
+  .seal-bg-btn{
+    border:3px solid #fff; border-radius:16px; padding:4px 14px 6px; cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,.2); background:rgba(255,255,255,.55);
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    font-family:inherit; font-weight:bold; font-size:clamp(10px,2.6vw,13px); color:var(--ink);
+  }
+  .seal-bg-btn img{ width:clamp(36px,9vw,52px); height:clamp(36px,9vw,52px); object-fit:cover; border-radius:10px; }
+  .seal-bg-btn.selected{ border-color:var(--red); background:rgba(255,255,255,.9); transform:scale(1.06); }
   #seal-board-wrap{ flex:1 1 auto; overflow-y:auto; padding:6px 10px 14px; }
   #seal-board{
     display:grid; grid-template-columns:repeat(5,1fr); gap:8px;
@@ -252,6 +293,19 @@
     transform:scale(0) rotate(-25deg); transition:transform .5s cubic-bezier(.34,1.56,.64,1) .1s;
   }
   #stickerReveal.show .sticker-card-big{ transform:scale(1) rotate(0deg); }
+  .sticker-reveal-name{
+    font-size:clamp(17px,5.2vw,26px); font-weight:900; color:#fff; text-align:center;
+    text-shadow:0 3px 0 var(--red), 0 0 14px rgba(255,220,120,.8);
+    letter-spacing:1px; transform:skewX(-6deg);
+    opacity:0; transition:opacity .3s ease .4s;
+  }
+  .sticker-reveal-phrase{
+    font-size:clamp(12px,3.6vw,16px); font-weight:bold; color:#fff8ea; text-align:center; max-width:82vw;
+    text-shadow:1px 1px 0 rgba(0,0,0,.5); line-height:1.4;
+    opacity:0; transition:opacity .3s ease .5s;
+  }
+  #stickerReveal.show .sticker-reveal-name,
+  #stickerReveal.show .sticker-reveal-phrase{ opacity:1; }
   #stickerRevealCloseBtn{
     border:none; border-radius:26px; font-family:inherit; font-weight:bold; color:#fff;
     padding:10px 28px; font-size:clamp(14px,3.6vw,18px);
@@ -317,6 +371,48 @@
     75%{ transform:rotate(-7deg) translateY(4px); }
     100%{ transform:rotate(0deg) translateY(0); }
   }
+
+  /* ================= GAME 3b: SHAKE PUZZLE (6-piece shatter/reassemble) ================= */
+  #carPuzzleArea{ flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+  #puzzleStageWrap{ flex:1 1 auto; display:flex; align-items:center; justify-content:center; min-height:0; }
+  #puzzleStage{ position:relative; width:clamp(200px,58vw,300px); height:clamp(200px,58vw,300px); }
+  .puzzle-guide{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+    opacity:0; transition:opacity .6s ease; pointer-events:none;
+  }
+  .puzzle-guide-lines{
+    position:absolute; inset:0; width:100%; height:100%;
+    opacity:0; transition:opacity .6s ease; pointer-events:none;
+  }
+  .puzzle-guide-lines line{ stroke:rgba(122,46,26,.6); stroke-width:0.7; stroke-dasharray:2.5 2; }
+  .puzzle-piece{ position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; }
+  .puzzle-piece.dragging{ z-index:50; cursor:grabbing; }
+  .puzzle-piece.placed{ cursor:default; }
+  .puzzle-piece-inner{ width:100%; height:100%; }
+  .puzzle-piece-inner.rejected{ animation:shake .4s ease; }
+  .puzzle-piece img{ width:100%; height:100%; object-fit:contain; display:block; filter:drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+  .puzzle-piece.dragging img{ filter:drop-shadow(0 8px 8px rgba(0,0,0,.4)); }
+  .puzzle-piece.placed img{ animation:piecePlaced .4s ease; filter:drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+  @keyframes piecePlaced{
+    0%{ filter:brightness(1) drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+    40%{ filter:brightness(1.7) drop-shadow(0 0 12px gold); }
+    100%{ filter:brightness(1) drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+  }
+
+  #puzzleShakeBtn{
+    flex:0 0 auto; align-self:center; margin:2px auto clamp(4px,1vh,8px);
+    padding:12px 34px; font-size:clamp(16px,4.4vw,22px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,#c9a8ff,#7a4fd6); border:none; border-radius:30px;
+    box-shadow:0 6px 0 #5a35a0; font-family:inherit; animation:dekitaPulse .8s ease-in-out infinite;
+  }
+  #puzzleShakeBtn:active{ box-shadow:0 2px 0 #5a35a0; transform:translateY(4px); }
+  #puzzleNextBtn{
+    flex:0 0 auto; align-self:center; margin:2px auto clamp(4px,1vh,8px);
+    padding:10px 30px; font-size:clamp(15px,4vw,20px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,var(--mustard),#a9711c); border:none; border-radius:30px;
+    box-shadow:0 6px 0 #8a5810; font-family:inherit; animation:dekitaPulse .8s ease-in-out infinite;
+  }
+  #puzzleNextBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(4px); }
 </style>
 </head>
 <body>
@@ -325,11 +421,6 @@
   <!-- ================= MENU ================= -->
   <div id="screen-menu" class="screen active">
     <div id="menu-title">モンスターの<br>ごはんタイム</div>
-    <div id="satiety-wrap">
-      <span id="satiety-label">まんぷくど</span>
-      <div id="satiety-bar"><div id="satiety-fill"></div></div>
-      <span id="satiety-pct">0%</span>
-    </div>
     <button class="menu-btn" id="btn-count"><span class="emoji">🍜</span>あぶらそばを かぞえよう！</button>
     <button class="menu-btn" id="btn-car"><span class="emoji">🚗</span>くるまの かたちあわせ</button>
     <button class="menu-btn" id="btn-seal"><span class="emoji">📔</span>シールちょう</button>
@@ -337,8 +428,13 @@
 
   <!-- ================= GAME 1: COUNTING ================= -->
   <div id="screen-count" class="screen">
-    <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div></div></div>
+    <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div class="sticker-progress" id="stickerProgress1"></div></div>
     <div id="title">あぶらそばを かぞえよう！</div>
+    <div class="remaining-badge" id="remainingBadge1">
+      <span class="remaining-label">のこり</span>
+      <span class="remaining-num" id="remainingNum1">0</span>
+      <span class="remaining-unit">こ</span>
+    </div>
     <div class="body-area">
       <div class="monster-area1">
         <div class="speech-bubble" id="orderBubble1">なんこ たべられるかな？</div>
@@ -361,9 +457,8 @@
     <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div></div></div>
     <div id="title">シールちょう</div>
     <div class="seal-bg-buttons">
-      <button class="seal-bg-btn" data-bg="1"><img src="images/bg_seal_01.png" alt="はいけい1"></button>
-      <button class="seal-bg-btn" data-bg="2"><img src="images/bg_seal_02.png" alt="はいけい2"></button>
-      <button class="seal-bg-btn" data-bg="3"><img src="images/bg_seal_03.png" alt="はいけい3"></button>
+      <button class="seal-bg-btn" data-bg="boy"><img src="images/bg_seal_boy.png" alt="おとこのこ">おとこのこ</button>
+      <button class="seal-bg-btn" data-bg="girl"><img src="images/bg_seal_girl.png" alt="おんなのこ">おんなのこ</button>
     </div>
     <div id="seal-board-wrap">
       <div id="seal-board"></div>
@@ -372,7 +467,7 @@
 
   <!-- ================= GAME 3: CAR SHAPE MATCHING ================= -->
   <div id="screen-car" class="screen">
-    <div class="topbar"><button class="small-btn btn-back" id="carBackBtn">◀ もどる</button><div></div></div>
+    <div class="topbar"><button class="small-btn btn-back" id="carBackBtn">◀ もどる</button><div class="sticker-progress" id="stickerProgressCar"></div></div>
     <div id="title">くるまの かたちあわせ</div>
 
     <div id="carDifficultySelect">
@@ -381,6 +476,7 @@
       <button class="menu-btn car-diff-btn" data-diff="intermediate" style="background:linear-gradient(180deg,#a3e08a,#4a9a4a);">ちゅうきゅう</button>
       <button class="menu-btn car-diff-btn" data-diff="advanced" style="background:linear-gradient(180deg,#ff9ec9,#e2508e);">じょうきゅう</button>
       <button class="menu-btn car-diff-btn" data-diff="expert" style="background:linear-gradient(180deg,#ffb066,#e2661a);">ちょうきゅう</button>
+      <button class="menu-btn car-diff-btn" data-diff="puzzle" style="background:linear-gradient(180deg,#c9a8ff,#7a4fd6);">シェイクパズル</button>
     </div>
 
     <div id="carPlayArea" style="display:none;">
@@ -392,6 +488,21 @@
       <button id="carNextBtn" style="display:none;">つぎの もんだい ▶</button>
       <div id="carChoices"></div>
     </div>
+
+    <div id="carPuzzleArea" style="display:none;">
+      <div class="monster-area-car">
+        <div class="speech-bubble" id="puzzleBubble">スマホを ふってね！</div>
+        <img class="monster-img small" id="monsterImgPuzzle" src="images/monster_normal.png" alt="モンスター">
+      </div>
+      <div id="puzzleStageWrap">
+        <div id="puzzleStage">
+          <img class="puzzle-guide" id="puzzleGuideShadow" src="" alt="">
+          <svg class="puzzle-guide-lines" id="puzzleGuideLines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <button id="puzzleShakeBtn">ふってスタート！</button>
+      <button id="puzzleNextBtn" style="display:none;">つぎの くるま ▶</button>
+    </div>
   </div>
 
 </div>
@@ -402,6 +513,8 @@
   <div class="sticker-card sticker-card-big">
     <img id="stickerRevealImg" src="" alt="シール">
   </div>
+  <div class="sticker-reveal-name" id="stickerRevealName"></div>
+  <div class="sticker-reveal-phrase" id="stickerRevealPhrase"></div>
   <button id="stickerRevealCloseBtn">とじる</button>
 </div>
 
@@ -415,13 +528,69 @@
     img.addEventListener('error', function(){ imgFallback(img); });
   });
 
+  /* ===================== sticker character data (Bikkuriman-style angel/devil pairs) ===================== */
+  var STICKERS = [
+    {name:'ほのおエンジェル', phrase:'あつあつハートで ぽかぽかに するよ！'},
+    {name:'ほのおデビル', phrase:'いたずらファイヤーで おしりを あぶっちゃうぞ！'},
+    {name:'こおりエンジェル', phrase:'つめたい てを ぎゅっと あたためるよ！'},
+    {name:'こおりデビル', phrase:'ぷるぷる こおらせ いたずらするぞ！'},
+    {name:'かみなりエンジェル', phrase:'ぴかっと ひかって げんきを あげる！'},
+    {name:'かみなりデビル', phrase:'ビリビリ いたずらで びっくりさせるぞ！'},
+    {name:'かぜエンジェル', phrase:'そよそよ かぜで きもちよく してあげる！'},
+    {name:'かぜデビル', phrase:'ぴゅーっと ふきとばす いたずらずき！'},
+    {name:'だいちエンジェル', phrase:'ふかふか つちで みんなを まもるよ！'},
+    {name:'だいちデビル', phrase:'どろんこ まみれに しちゃうぞ！'},
+    {name:'しずくエンジェル', phrase:'つるつる しずくで きれいに あらうよ！'},
+    {name:'しずくデビル', phrase:'びしょぬれ いたずら だいすき！'},
+    {name:'ひかりエンジェル', phrase:'まぶしい ひかりで あんしんを とどけるよ！'},
+    {name:'ひかりデビル', phrase:'ピカピカ めがくらむ いたずらこうせん！'},
+    {name:'やみエンジェル', phrase:'よるの おともだち やさしく みまもるよ！'},
+    {name:'やみデビル', phrase:'まっくらやみで おばけの まねっこ！'},
+    {name:'ほしエンジェル', phrase:'きらきら ほしぞらで ゆめを みせるよ！'},
+    {name:'ほしデビル', phrase:'りゅうせい いたずらで どっきり！'},
+    {name:'つきエンジェル', phrase:'しずかな よるに おやすみうたを うたうよ'},
+    {name:'つきデビル', phrase:'まんげつの よるに いたずら たいかい！'},
+    {name:'たいようエンジェル', phrase:'あさひの ひかりで げんきに おこすよ！'},
+    {name:'たいようデビル', phrase:'あつーい ひざしで あせだくに するぞ！'},
+    {name:'はなエンジェル', phrase:'いいにおいの はなたばを プレゼント！'},
+    {name:'はなデビル', phrase:'くしゃみが とまらない はなふん いたずら！'},
+    {name:'もりエンジェル', phrase:'みどりの もりで しんこきゅう しようね'},
+    {name:'もりデビル', phrase:'かくれんぼ とくいな いたずらもりびと！'},
+    {name:'うみエンジェル', phrase:'あおい うみで いっしょに およごうね！'},
+    {name:'うみデビル', phrase:'おおなみざぶーん いたずらは とくい！'},
+    {name:'やまエンジェル', phrase:'たかい やまから みんなを おうえん！'},
+    {name:'やまデビル', phrase:'やまびこで まねっこ いたずらするぞ！'},
+    {name:'くもエンジェル', phrase:'ふわふわ くものうえで おひるねしよう'},
+    {name:'くもデビル', phrase:'きゅうな あめで びしょぬれ いたずら！'},
+    {name:'にじエンジェル', phrase:'あめのあと にじをかけて みんなをえがおに'},
+    {name:'にじデビル', phrase:'にじいろ いたずらペイントで まっしろに！'},
+    {name:'すなエンジェル', phrase:'さらさら すなで おしろを つくろうね'},
+    {name:'すなデビル', phrase:'すなあらしで めが あけられない いたずら！'},
+    {name:'おとエンジェル', phrase:'たのしい うたごえで みんなを げんきに！'},
+    {name:'おとデビル', phrase:'おおきな おとで びっくり いたずら！'},
+    {name:'ゆめエンジェル', phrase:'たのしい ゆめを みせて あげるよ'},
+    {name:'ゆめデビル', phrase:'こわいゆめで どきどき いたずら！'},
+    {name:'かがみエンジェル', phrase:'きらきら かがみで えがおを うつすよ'},
+    {name:'かがみデビル', phrase:'へんなかおに うつす いたずらかがみ！'},
+    {name:'ほうせきエンジェル', phrase:'きらめく たからもので みんなを しあわせに'},
+    {name:'ほうせきデビル', phrase:'にせもの たからばこで だまし いたずら！'},
+    {name:'ひょうがエンジェル', phrase:'つめたい かぜで ひやして あげるよ'},
+    {name:'ひょうがデビル', phrase:'つるつる こおりで すべって いたずら！'},
+    {name:'いなずまエンジェル', phrase:'はやわざで こまったときに かけつけるよ'},
+    {name:'いなずまデビル', phrase:'びゅーんと はやい いたずら にげあし！'},
+    {name:'あらしエンジェル', phrase:'あらしの あとには きっと はれるよ'},
+    {name:'あらしデビル', phrase:'ぐるぐる たつまきで まきあげ いたずら！'}
+  ];
+
   /* ===================== localStorage state ===================== */
   var STORAGE_KEY = 'monsterCafeStateV1';
   var TOTAL_STICKERS = 50;
   var state = loadState();
 
+  var CORRECT_PER_STICKER = 5;
+
   function loadState(){
-    var defaults = { satiety:0, stickers:[], nextSticker:1, sealBg:1 };
+    var defaults = { stickers:[], nextSticker:1, sealBg:'boy', correctStreak:0 };
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(raw){
@@ -434,10 +603,6 @@
   function saveState(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   }
-  function addSatiety(n){
-    state.satiety = Math.min(100, state.satiety + n);
-    saveState();
-  }
   function awardSticker(){
     if(state.nextSticker <= TOTAL_STICKERS){
       var awarded = state.nextSticker;
@@ -449,16 +614,33 @@
     }
     return null;
   }
-  function renderSatiety(){
-    document.getElementById('satiety-fill').style.width = state.satiety + '%';
-    document.getElementById('satiety-pct').textContent = state.satiety + '%';
+  function registerCorrect(){
+    state.correctStreak++;
+    if(state.correctStreak >= CORRECT_PER_STICKER){
+      state.correctStreak = 0;
+      saveState();
+      awardSticker();
+    } else {
+      saveState();
+    }
+    renderStickerProgress();
   }
-
+  function renderStickerProgress(){
+    var remaining = CORRECT_PER_STICKER - state.correctStreak;
+    var dots = '';
+    for(var i=0;i<CORRECT_PER_STICKER;i++){
+      dots += '<span class="dot'+(i<state.correctStreak?' filled':'')+'"></span>';
+    }
+    var html = '<span class="dots">'+dots+'</span><span>あと'+remaining+'こでシール！</span>';
+    ['stickerProgress1','stickerProgressCar'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.innerHTML = html;
+    });
+  }
   /* ===================== navigation ===================== */
   var screens = document.querySelectorAll('.screen');
   function showScreen(name){
     screens.forEach(function(s){ s.classList.toggle('active', s.id === 'screen-'+name); });
-    if(name === 'menu'){ renderSatiety(); }
     if(name === 'count'){ resetCountGame(); }
     if(name === 'seal'){ renderSealBoard(); }
     if(name === 'car'){ window.resetCarGame(); }
@@ -469,7 +651,7 @@
   document.querySelectorAll('[data-nav="menu"]').forEach(function(b){
     b.addEventListener('pointerdown', function(e){ e.stopPropagation(); showScreen('menu'); });
   });
-  renderSatiety();
+  renderStickerProgress();
 
   /* ===================== audio (synth, no assets) ===================== */
   var actx = null;
@@ -495,6 +677,7 @@
   function playStealSound(){ beep(500,0.10,0,'sawtooth',0.18); beep(360,0.12,0.06,'sawtooth',0.16); beep(240,0.16,0.12,'sawtooth',0.14); }
   function playRejectSound(){ beep(300,0.12,0,'sawtooth',0.12); beep(220,0.16,0.08,'sawtooth',0.12); }
   function playCelebrationSound(){ [523,659,784,1047].forEach(function(f,i){ beep(f,0.22,i*0.13,'triangle',0.22); }); }
+  function playExplosionSound(){ beep(180,0.28,0,'sawtooth',0.28); beep(90,0.32,0.05,'sawtooth',0.24); beep(50,0.36,0.10,'square',0.2); }
 
   /* ===================== shared fx helpers ===================== */
   function spawnStars(){
@@ -545,13 +728,24 @@
     screenEl.classList.add('shake');
     setTimeout(function(){ screenEl.classList.remove('shake'); }, 400);
   }
+  function showResultMark(isCorrect){
+    var layer = document.getElementById('popup-layer');
+    var mark = document.createElement('div');
+    mark.className = 'result-mark ' + (isCorrect ? 'correct' : 'wrong');
+    mark.textContent = isCorrect ? '○' : '×';
+    layer.appendChild(mark);
+    setTimeout(function(){ if(mark.parentNode) mark.parentNode.removeChild(mark); }, 700);
+  }
   function showStickerGetReveal(num){
     var overlay = document.getElementById('stickerReveal');
     var img = document.getElementById('stickerRevealImg');
     var num2 = ('0'+num).slice(-2);
+    var info = STICKERS[num-1] || {name:'シール'+num2, phrase:''};
     img.src = 'images/seal_'+num2+'.png';
-    img.alt = 'シール'+num2;
+    img.alt = info.name;
     img.onerror = function(){ imgFallback(img); };
+    document.getElementById('stickerRevealName').textContent = info.name;
+    document.getElementById('stickerRevealPhrase').textContent = info.phrase;
     ensureAudio();
     playCelebrationSound();
     spawnStars();
@@ -634,28 +828,62 @@
     var monsterImg = document.getElementById('monsterImg1');
     var orderBubble = document.getElementById('orderBubble1');
     var resetBtn = document.getElementById('resetBtn1');
+    var remainingBadge = document.getElementById('remainingBadge1');
+    var remainingNumEl = document.getElementById('remainingNum1');
 
     var target = 4, plateCount = 0, cleared = false;
-    var beltItems = []; // {el, x, y, speed, held}
+    var beltItems = []; // {el, x, y, speed, held, isBomb}
     var beltIdSeq = 0;
     var spawnTimer = null, crowTimer = null, rafId = null;
     var lastTs = null;
+    var BOMB_CHANCE = 0.3;
 
     function pxWidth(){ return beltWrap.clientWidth; }
 
+    function updateRemainingDisplay(){
+      remainingNumEl.textContent = Math.max(0, target - plateCount);
+      remainingBadge.classList.remove('pulse');
+      void remainingBadge.offsetWidth;
+      remainingBadge.classList.add('pulse');
+    }
+
     function spawnBeltItem(){
       if(cleared) return;
+      var hasBomb = beltItems.some(function(it){ return it.isBomb; });
+      var isBomb = !hasBomb && Math.random() < BOMB_CHANCE;
       var el = document.createElement('img');
-      el.className = 'belt-item';
-      el.src = 'images/food_aburasoba.png';
-      el.alt = 'あぶらそば';
+      el.className = 'belt-item' + (isBomb ? ' belt-item-bomb' : '');
+      el.src = isBomb ? 'images/food_bomb.png' : 'images/food_aburasoba.png';
+      el.alt = isBomb ? 'ばくだん' : 'あぶらそば';
       el.addEventListener('error', function(){ imgFallback(el); });
       el.style.top = (58 + Math.random()*8) + '%';
       beltItemsLayer.appendChild(el);
-      var item = { id: ++beltIdSeq, el:el, x:-100, speed: 34 + Math.random()*14, held:false };
+      var item = { id: ++beltIdSeq, el:el, x:-100, speed: 34 + Math.random()*14, held:false, isBomb:isBomb };
       el.style.transform = 'translateX(-100px)';
       beltItems.push(item);
-      attachBeltDrag(item);
+      if(isBomb){ attachBombTouch(item); } else { attachBeltDrag(item); }
+    }
+
+    function attachBombTouch(item){
+      var el = item.el;
+      el.addEventListener('pointerdown', function(e){
+        if(cleared || item.exploded) return;
+        item.exploded = true;
+        ensureAudio();
+        try{ el.setPointerCapture(e.pointerId); }catch(err){}
+        explodeBomb(item);
+      });
+    }
+
+    function explodeBomb(item){
+      removeBeltItem(item);
+      plateCount = 0;
+      playExplosionSound();
+      renderPlateIcons();
+      updateRemainingDisplay();
+      showResultMark(false);
+      shakeScreen(screenEl);
+      flashBubble(orderBubble, 'ばくだんだ～！<br>ぜんぶ おちちゃった...');
     }
     function scheduleSpawn(){
       var delay = 1600 + Math.random()*1200;
@@ -729,6 +957,7 @@
       plateCount++;
       playCatchSound(plateCount);
       renderPlateIcons();
+      updateRemainingDisplay();
       var r = plateArea.getBoundingClientRect();
       showNumberPopup(plateCount, r.left+r.width/2, window.innerHeight*0.28, false);
       if(plateCount < target){
@@ -795,6 +1024,7 @@
       plateCount = Math.max(0, plateCount-1);
       playStealSound();
       renderPlateIcons();
+      updateRemainingDisplay();
       var r = plateArea.getBoundingClientRect();
       showNumberPopup('-1', r.left+r.width/2, window.innerHeight*0.28, true);
       flashBubble(orderBubble, 'カラスに とられちゃった！');
@@ -819,8 +1049,7 @@
         monsterImg.src = 'images/monster_happy.png';
         spawnStars();
         flashBubble(orderBubble, 'ごちそうさま！<br>おいしい！🎉');
-        addSatiety(8);
-        awardSticker();
+        registerCorrect();
         resetBtn.style.display = '';
       }, 700);
     }
@@ -848,6 +1077,7 @@
       lastTs = null;
       monsterImg.src = 'images/monster_normal.png';
       renderPlateIcons();
+      updateRemainingDisplay();
       resetBtn.style.display = 'none';
       document.getElementById('stars-layer').innerHTML = '';
       orderBubble.innerHTML = '<span class="num">'+target+'</span>こ ちょうだい！';
@@ -869,16 +1099,17 @@
     bgButtons.forEach(function(btn){
       btn.addEventListener('pointerdown', function(e){
         e.stopPropagation();
-        state.sealBg = parseInt(btn.dataset.bg, 10);
+        state.sealBg = btn.dataset.bg;
         saveState();
         renderSealBoard();
       });
     });
 
     window.renderSealBoard = function(){
-      sealBoard.style.backgroundImage = "url('images/bg_seal_0"+state.sealBg+".png')";
+      if(state.sealBg !== 'boy' && state.sealBg !== 'girl'){ state.sealBg = 'boy'; }
+      sealBoard.style.backgroundImage = "url('images/bg_seal_"+state.sealBg+".png')";
       bgButtons.forEach(function(btn){
-        btn.classList.toggle('selected', parseInt(btn.dataset.bg,10) === state.sealBg);
+        btn.classList.toggle('selected', btn.dataset.bg === state.sealBg);
       });
       sealBoard.innerHTML = '';
       for(var i=1;i<=TOTAL_STICKERS;i++){
@@ -888,7 +1119,7 @@
         var num = ('0'+i).slice(-2);
         var img = document.createElement('img');
         img.src = 'images/seal_'+num+'.png';
-        img.alt = unlocked ? ('シール'+num) : 'みかくとく';
+        img.alt = unlocked ? (STICKERS[i-1] ? STICKERS[i-1].name : ('シール'+num)) : 'みかくとく';
         img.addEventListener('error', function(){ imgFallback(this); });
         if(unlocked){
           var card = document.createElement('div');
@@ -910,6 +1141,7 @@
     var screenEl = document.getElementById('screen-car');
     var diffSelect = document.getElementById('carDifficultySelect');
     var playArea = document.getElementById('carPlayArea');
+    var puzzleArea = document.getElementById('carPuzzleArea');
     var shadowZone = document.getElementById('carShadowZone');
     var choicesTray = document.getElementById('carChoices');
     var nextBtn = document.getElementById('carNextBtn');
@@ -926,7 +1158,17 @@
       {id:'car_07', name:'しょうぼうしゃ'},
       {id:'car_08', name:'きゅうきゅうしゃ'},
       {id:'car_09', name:'ジープ'},
-      {id:'car_10', name:'クラシックカー'}
+      {id:'car_10', name:'クラシックカー'},
+      {id:'car_11', name:'ごみしゅうしゅうしゃ'},
+      {id:'car_12', name:'タクシー'},
+      {id:'car_13', name:'オープンカー'},
+      {id:'car_14', name:'ミニバン'},
+      {id:'car_15', name:'レッカーしゃ'},
+      {id:'car_16', name:'リムジン'},
+      {id:'car_17', name:'ミキサーしゃ'},
+      {id:'car_18', name:'にかいだてバス'},
+      {id:'car_19', name:'モンスタートラック'},
+      {id:'car_20', name:'まるいコンパクトカー'}
     ];
     var SFX_WORDS = ['ブロロロ！','ウーウー！','ブオーン！','パーン！'];
 
@@ -953,10 +1195,12 @@
     });
     document.getElementById('carBackBtn').addEventListener('pointerdown', function(e){
       e.stopPropagation();
-      if(playArea.style.display !== 'none'){
+      if(playArea.style.display !== 'none' || puzzleArea.style.display !== 'none'){
         // mid-game -> back to this game's difficulty select
+        cleanupMotion();
         diffSelect.style.display = '';
         playArea.style.display = 'none';
+        puzzleArea.style.display = 'none';
       } else {
         // already on difficulty select -> back to the main menu
         showScreen('menu');
@@ -966,6 +1210,11 @@
     function startDifficulty(diff){
       difficulty = diff;
       diffSelect.style.display = 'none';
+      if(diff === 'puzzle'){
+        puzzleArea.style.display = 'flex';
+        newPuzzleRound();
+        return;
+      }
       playArea.style.display = 'flex';
       newRound();
     }
@@ -1050,8 +1299,8 @@
 
     /* single-shadow-zone drop target (beginner / intermediate / expert) */
     function attachCarDragStandard(el, carId){
-      attachDrag(el, function(){ return shadowZone; }, {
-        pad:0.35,
+      attachDrag(el, function(){ return document.getElementById('carShadowMain') || shadowZone; }, {
+        pad:0.15,
         canDrag:function(){ return !locked; },
         onDrop:function(el){
           if(locked) return;
@@ -1129,8 +1378,8 @@
 
       monsterImgCar.src = 'images/monster_happy.png';
       spawnStars();
-      addSatiety(4);
-      awardSticker();
+      registerCorrect();
+      showResultMark(true);
       flashBubble(carBubble, 'せいかい！🎉');
       nextBtn.style.display = '';
     }
@@ -1138,6 +1387,7 @@
     function carWrong(el){
       playRejectSound();
       bounceHome(el);
+      showResultMark(false);
       monsterImgCar.src = 'images/monster_weird.png';
       monsterImgCar.classList.add('car-stumble');
       flashBubble(carBubble, 'ちがう みたい...');
@@ -1150,9 +1400,227 @@
     nextBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); newRound(); });
 
     window.resetCarGame = function(){
+      cleanupMotion();
       diffSelect.style.display = '';
       playArea.style.display = 'none';
+      puzzleArea.style.display = 'none';
     };
+
+    /* ===================================================================
+       GAME 3b: シェイクパズル (shake-to-shatter, 6-piece reassembly puzzle)
+       =================================================================== */
+    var puzzleStage = document.getElementById('puzzleStage');
+    var puzzleGuide = document.getElementById('puzzleGuideShadow');
+    var puzzleGuideLines = document.getElementById('puzzleGuideLines');
+    var puzzleBubble = document.getElementById('puzzleBubble');
+    var monsterImgPuzzle = document.getElementById('monsterImgPuzzle');
+    var puzzleShakeBtn = document.getElementById('puzzleShakeBtn');
+    var puzzleNextBtn = document.getElementById('puzzleNextBtn');
+
+    var PIECE_COUNT = 6;
+    var SNAP_RADIUS = 55;
+    var puzzleCar = null, pieces = [], puzzleShattered = false;
+    var motionHandler = null, lastAccel = null, lastShakeTime = 0;
+    var currentAngles = []; // 6 randomized wedge-boundary angles, re-rolled every round
+
+    function randomizeAngles(){
+      var base = 360/PIECE_COUNT;
+      var jitter = base * 0.45; // keeps every wedge a reasonable, grabbable size
+      var angles = [];
+      for(var i=0;i<PIECE_COUNT;i++){
+        angles.push(i*base + (Math.random()*2-1)*jitter);
+      }
+      currentAngles = angles;
+    }
+    function pieceClipPath(i){
+      var startDeg = currentAngles[i];
+      var endDeg = (i < PIECE_COUNT-1) ? currentAngles[i+1] : currentAngles[0] + 360;
+      function pt(deg){
+        var rad = deg * Math.PI/180;
+        var x = 50 + 150*Math.cos(rad), y = 50 + 150*Math.sin(rad);
+        return x.toFixed(1)+'% '+y.toFixed(1)+'%';
+      }
+      return 'polygon(50% 50%, '+pt(startDeg)+', '+pt(endDeg)+')';
+    }
+    function boundaryPoint(deg){
+      // where a ray from the center (50,50) at angle deg hits the square edge of a 0-100 box
+      var rad = deg * Math.PI/180;
+      var cosA = Math.cos(rad), sinA = Math.sin(rad);
+      var r = 50 / Math.max(Math.abs(cosA), Math.abs(sinA), 0.0001);
+      return { x: 50 + r*cosA, y: 50 + r*sinA };
+    }
+    function buildGuideLines(){
+      var svgNS = 'http://www.w3.org/2000/svg';
+      puzzleGuideLines.innerHTML = '';
+      for(var i=0;i<PIECE_COUNT;i++){
+        var p = boundaryPoint(currentAngles[i]);
+        var line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1','50'); line.setAttribute('y1','50');
+        line.setAttribute('x2', p.x.toFixed(2)); line.setAttribute('y2', p.y.toFixed(2));
+        puzzleGuideLines.appendChild(line);
+      }
+    }
+
+    function applyPieceTransform(piece, extraX, extraY, rotOverride){
+      var x = piece.restX + (extraX||0), y = piece.restY + (extraY||0);
+      var rot = (rotOverride != null) ? rotOverride : piece.restRot;
+      piece.el.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg)';
+    }
+
+    function buildPuzzlePieces(car){
+      puzzleStage.querySelectorAll('.puzzle-piece').forEach(function(p){ p.remove(); });
+      pieces = [];
+      for(var i=0;i<PIECE_COUNT;i++){
+        var el = document.createElement('div');
+        el.className = 'puzzle-piece';
+        el.style.clipPath = pieceClipPath(i);
+        var inner = document.createElement('div');
+        inner.className = 'puzzle-piece-inner';
+        inner.appendChild(makeImg('images/'+car.id+'.png', '', null));
+        el.appendChild(inner);
+        puzzleStage.appendChild(el);
+        var piece = { el:el, restX:0, restY:0, restRot:0, placed:false };
+        pieces.push(piece);
+        attachPuzzleDrag(piece);
+        applyPieceTransform(piece);
+      }
+    }
+
+    function scatterPieces(){
+      pieces.forEach(function(piece){
+        var angle = Math.random()*Math.PI*2;
+        var dist = 90 + Math.random()*90;
+        piece.restX = Math.cos(angle)*dist;
+        piece.restY = Math.sin(angle)*dist + 30;
+        piece.restRot = Math.random()*140-70;
+        piece.el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)';
+        applyPieceTransform(piece);
+      });
+    }
+
+    function attachPuzzleDrag(piece){
+      var el = piece.el;
+      var inner = el.querySelector('.puzzle-piece-inner');
+      var startX=0, startY=0, dragging=false;
+      el.addEventListener('pointerdown', function(e){
+        if(!puzzleShattered || piece.placed) return;
+        ensureAudio();
+        dragging = true;
+        el.classList.add('dragging');
+        try{ el.setPointerCapture(e.pointerId); }catch(err){}
+        startX = e.clientX; startY = e.clientY;
+        // straighten the piece the moment it's grabbed, so its shape is easy to read while dragging
+        el.style.transition = 'transform .18s ease';
+        applyPieceTransform(piece, 0, 0, 0);
+        setTimeout(function(){ if(dragging) el.style.transition = 'none'; }, 180);
+      });
+      el.addEventListener('pointermove', function(e){
+        if(!dragging) return;
+        applyPieceTransform(piece, e.clientX-startX, e.clientY-startY, 0);
+      });
+      function endDrag(e){
+        if(!dragging) return;
+        dragging = false;
+        el.classList.remove('dragging');
+        var dx = e.clientX-startX, dy = e.clientY-startY;
+        var finalX = piece.restX+dx, finalY = piece.restY+dy;
+        var dist = Math.sqrt(finalX*finalX + finalY*finalY);
+        el.style.transition = 'transform .35s cubic-bezier(.34,1.56,.64,1)';
+        if(dist <= SNAP_RADIUS){
+          piece.restX = 0; piece.restY = 0; piece.restRot = 0;
+          piece.placed = true;
+          el.classList.add('placed');
+          applyPieceTransform(piece);
+          playCatchSound(1);
+          checkPuzzleSolved();
+        } else {
+          inner.classList.add('rejected');
+          setTimeout(function(){ inner.classList.remove('rejected'); }, 400);
+          applyPieceTransform(piece);
+        }
+      }
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
+    }
+
+    function checkPuzzleSolved(){
+      if(!pieces.every(function(p){ return p.placed; })) return;
+      monsterImgPuzzle.src = 'images/monster_happy.png';
+      flashBubble(puzzleBubble, 'できた！🎉');
+      playCelebrationSound();
+      spawnStars();
+      registerCorrect();
+      showResultMark(true);
+      puzzleNextBtn.style.display = '';
+    }
+
+    function playShatterSound(){ beep(1200,0.06,0,'square',0.2); beep(900,0.08,0.04,'square',0.18); beep(700,0.1,0.08,'square',0.16); }
+
+    function shatterPuzzle(){
+      if(puzzleShattered) return;
+      puzzleShattered = true;
+      ensureAudio();
+      playShatterSound();
+      shakeScreen(screenEl);
+      puzzleShakeBtn.style.display = 'none';
+      flashBubble(puzzleBubble, 'ピースを あわせてね！');
+      scatterPieces();
+    }
+
+    function setupMotion(){
+      cleanupMotion();
+      motionHandler = function(e){
+        var a = e.accelerationIncludingGravity || e.acceleration;
+        if(!a || a.x==null) return;
+        var now = Date.now();
+        if(lastAccel){
+          var d = Math.abs(a.x-lastAccel.x)+Math.abs(a.y-lastAccel.y)+Math.abs(a.z-lastAccel.z);
+          if(d > 28 && now-lastShakeTime > 800){
+            lastShakeTime = now;
+            shatterPuzzle();
+          }
+        }
+        lastAccel = {x:a.x,y:a.y,z:a.z};
+      };
+      window.addEventListener('devicemotion', motionHandler);
+    }
+    function cleanupMotion(){
+      if(motionHandler){ window.removeEventListener('devicemotion', motionHandler); motionHandler = null; }
+      lastAccel = null;
+    }
+
+    puzzleShakeBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      ensureAudio();
+      if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+        DeviceMotionEvent.requestPermission().then(function(res){
+          if(res === 'granted'){ setupMotion(); }
+        }).catch(function(){});
+      } else {
+        setupMotion();
+      }
+      // guaranteed fallback so the game always progresses even if shake/permission fails
+      shatterPuzzle();
+    });
+    puzzleNextBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); newPuzzleRound(); });
+
+    function newPuzzleRound(){
+      puzzleCar = CARS[Math.floor(Math.random()*CARS.length)];
+      puzzleShattered = false;
+      puzzleGuide.src = 'images/'+puzzleCar.id+'_shadow.png';
+      puzzleGuide.onerror = function(){ imgFallback(puzzleGuide); };
+      puzzleGuide.style.opacity = '0';
+      puzzleGuideLines.style.opacity = '0';
+      monsterImgPuzzle.src = 'images/monster_normal.png';
+      puzzleNextBtn.style.display = 'none';
+      puzzleShakeBtn.style.display = '';
+      flashBubble(puzzleBubble, 'スマホを ふってね！<br>（ボタンでもOK）');
+      randomizeAngles();
+      buildGuideLines();
+      buildPuzzlePieces(puzzleCar);
+      setTimeout(function(){ puzzleGuide.style.opacity = '.35'; puzzleGuideLines.style.opacity = '.9'; }, 50);
+      setupMotion();
+    }
   })();
 
   /* ===================== init ===================== */
@@ -1169,4 +1637,4 @@
   }
 </script>
 </body>
-</html>
+</html> 
