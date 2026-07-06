@@ -1640,6 +1640,14 @@
         console.warn('service worker registration failed:', err);
       });
     });
+    // when a newly-deployed service worker takes over, reload once so the
+    // fresh version is actually shown instead of waiting for a second visit
+    var swRefreshed = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(swRefreshed) return;
+      swRefreshed = true;
+      window.location.reload();
+    });
   }
 </script>
 </body>
