@@ -386,7 +386,7 @@
   }
   .puzzle-guide-lines line{ stroke:rgba(122,46,26,.6); stroke-width:0.7; stroke-dasharray:2.5 2; }
   .puzzle-piece{ position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; }
-  .puzzle-piece.dragging{ z-index:50; cursor:grabbing; }
+  .puzzle-piece.dragging{ cursor:grabbing; }
   .puzzle-piece.placed{ cursor:default; }
   .puzzle-piece-inner{ width:100%; height:100%; }
   .puzzle-piece-inner.rejected{ animation:shake .4s ease; }
@@ -1417,11 +1417,13 @@
     var puzzleShakeBtn = document.getElementById('puzzleShakeBtn');
     var puzzleNextBtn = document.getElementById('puzzleNextBtn');
 
-    var PIECE_COUNT = 6;
+    var PIECE_COUNT_OPTIONS = [6, 8, 10];
+    var PIECE_COUNT = 6; // re-rolled from PIECE_COUNT_OPTIONS every round
     var SNAP_RADIUS = 55;
     var puzzleCar = null, pieces = [], puzzleShattered = false;
     var motionHandler = null, lastAccel = null, lastShakeTime = 0;
-    var currentAngles = []; // 6 randomized wedge-boundary angles, re-rolled every round
+    var currentAngles = []; // randomized wedge-boundary angles, re-rolled every round
+    var zTop = 10; // running stacking-order counter so grabbed/loose pieces always render above placed ones
 
     function randomizeAngles(){
       var base = 360/PIECE_COUNT;
@@ -1474,6 +1476,7 @@
         var el = document.createElement('div');
         el.className = 'puzzle-piece';
         el.style.clipPath = pieceClipPath(i);
+        el.style.zIndex = ++zTop;
         var inner = document.createElement('div');
         inner.className = 'puzzle-piece-inner';
         inner.appendChild(makeImg('images/'+car.id+'.png', '', null));
@@ -1507,6 +1510,7 @@
         ensureAudio();
         dragging = true;
         el.classList.add('dragging');
+        el.style.zIndex = ++zTop; // always bring the grabbed piece to the very top, above any other piece
         try{ el.setPointerCapture(e.pointerId); }catch(err){}
         startX = e.clientX; startY = e.clientY;
         // straighten the piece the moment it's grabbed, so its shape is easy to read while dragging
@@ -1530,12 +1534,13 @@
           piece.restX = 0; piece.restY = 0; piece.restRot = 0;
           piece.placed = true;
           el.classList.add('placed');
+          el.style.zIndex = '1'; // sink below any still-loose pieces so they stay grabbable
           applyPieceTransform(piece);
           playCatchSound(1);
           checkPuzzleSolved();
         } else {
-          inner.classList.add('rejected');
-          setTimeout(function(){ inner.classList.remove('rejected'); }, 400);
+          // stay right where it was released instead of snapping back
+          piece.restX = finalX; piece.restY = finalY; piece.restRot = 0;
           applyPieceTransform(piece);
         }
       }
@@ -1606,6 +1611,7 @@
 
     function newPuzzleRound(){
       puzzleCar = CARS[Math.floor(Math.random()*CARS.length)];
+      PIECE_COUNT = PIECE_COUNT_OPTIONS[Math.floor(Math.random()*PIECE_COUNT_OPTIONS.length)];
       puzzleShattered = false;
       puzzleGuide.src = 'images/'+puzzleCar.id+'_shadow.png';
       puzzleGuide.onerror = function(){ imgFallback(puzzleGuide); };
