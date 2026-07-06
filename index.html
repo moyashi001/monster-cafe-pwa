@@ -438,6 +438,17 @@
     box-shadow:0 6px 0 #8a5810; font-family:inherit; animation:dekitaPulse .8s ease-in-out infinite;
   }
   #guruguruNextBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(4px); }
+  #guruguruRevealBtn{
+    flex:0 0 auto; padding:8px 26px; font-size:clamp(13px,3.6vw,17px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,#5ce1c9,#1a9e8a); border:none; border-radius:26px;
+    box-shadow:0 5px 0 #12786a; font-family:inherit;
+  }
+  #guruguruRevealBtn:active{ box-shadow:0 2px 0 #12786a; transform:translateY(3px); }
+
+  /* ---- shared shatter/reassemble fx overlay (reused by guruguru quiz) ---- */
+  .shatter-wrap{ position:absolute; inset:0; z-index:40; }
+  .shatter-piece{ position:absolute; inset:0; width:100%; height:100%; }
+  .shatter-piece img{ width:100%; height:100%; object-fit:contain; display:block; }
 </style>
 </head>
 <body>
@@ -450,7 +461,7 @@
     <button class="menu-btn" id="btn-car"><span class="emoji">🚗</span>くるまの かたちあわせ</button>
     <button class="menu-btn" id="btn-guruguru"><span class="emoji">🌀</span>ぐるぐるクイズ</button>
     <button class="menu-btn" id="btn-seal"><span class="emoji">📔</span>シールちょう</button>
-    <div id="app-version">v1.0.0</div>
+    <div id="app-version">v1.1.0</div>
   </div>
 
   <!-- ================= GAME 1: COUNTING ================= -->
@@ -545,6 +556,7 @@
       </div>
       <div id="guruguruStage"><canvas id="guruguruCanvas" width="360" height="270"></canvas></div>
       <div id="guruguruAnswer"></div>
+      <button id="guruguruRevealBtn">わかった！</button>
       <button id="guruguruNextBtn" style="display:none;">つぎの もんだい ▶</button>
     </div>
   </div>
@@ -782,6 +794,76 @@
     mark.textContent = isCorrect ? '○' : '×';
     layer.appendChild(mark);
     setTimeout(function(){ if(mark.parentNode) mark.parentNode.removeChild(mark); }, 700);
+  }
+  function playShatterSound(){ beep(1200,0.06,0,'square',0.2); beep(900,0.08,0.04,'square',0.18); beep(700,0.1,0.08,'square',0.16); }
+
+  /* ===================== shared shatter/reassemble fx =====================
+     Splits imgSrc into N pie-slice pieces (same geometric approach as the
+     car game's shake puzzle) inside containerEl (must be position:relative
+     and already showing the resolved image behind it), shatters them apart
+     with a "pariin" sound, then automatically gathers them back together
+     with a bouncy easing before calling onComplete(). Non-interactive - this
+     is a celebratory transition effect, not a drag puzzle. */
+  function playShatterReassemble(containerEl, imgSrc, onComplete){
+    var pieceCount = [6,8,10][Math.floor(Math.random()*3)];
+    var wrap = document.createElement('div');
+    wrap.className = 'shatter-wrap';
+    containerEl.appendChild(wrap);
+
+    var base = 360/pieceCount, jitter = base*0.45;
+    var angles = [];
+    for(var i=0;i<pieceCount;i++){ angles.push(i*base + (Math.random()*2-1)*jitter); }
+    function pieceClipPath(i){
+      var startDeg = angles[i], endDeg = (i<pieceCount-1) ? angles[i+1] : angles[0]+360;
+      function pt(deg){
+        var rad = deg*Math.PI/180;
+        return (50+150*Math.cos(rad)).toFixed(1)+'% '+(50+150*Math.sin(rad)).toFixed(1)+'%';
+      }
+      return 'polygon(50% 50%, '+pt(startDeg)+', '+pt(endDeg)+')';
+    }
+
+    var pieces = [];
+    for(var i=0;i<pieceCount;i++){
+      var el = document.createElement('div');
+      el.className = 'shatter-piece';
+      el.style.clipPath = pieceClipPath(i);
+      var img = document.createElement('img');
+      img.src = imgSrc;
+      img.alt = '';
+      el.appendChild(img);
+      wrap.appendChild(el);
+      pieces.push(el);
+    }
+
+    ensureAudio();
+    playShatterSound();
+    var screenEl = containerEl.closest ? containerEl.closest('.screen') : null;
+    if(screenEl) shakeScreen(screenEl);
+
+    // shatter outward
+    requestAnimationFrame(function(){
+      pieces.forEach(function(el){
+        var angle = Math.random()*Math.PI*2, dist = 55 + Math.random()*70;
+        var x = Math.cos(angle)*dist, y = Math.sin(angle)*dist + 15;
+        var rot = Math.random()*140 - 70;
+        el.style.transition = 'transform .45s cubic-bezier(.34,1.56,.64,1)';
+        el.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg)';
+      });
+    });
+
+    // gather back together into the complete picture
+    setTimeout(function(){
+      pieces.forEach(function(el, i){
+        el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1) '+(i*0.03)+'s';
+        el.style.transform = 'translate(0,0) rotate(0deg)';
+      });
+      playCatchSound(1);
+      spawnStars();
+      setTimeout(function(){
+        if(wrap.parentNode) wrap.parentNode.removeChild(wrap);
+        if(onComplete) onComplete();
+      }, 650);
+    }, 850);
   }
   function showStickerGetReveal(num){
     var overlay = document.getElementById('stickerReveal');
@@ -1683,12 +1765,36 @@
     var canvas = document.getElementById('guruguruCanvas');
     var ctx = canvas.getContext('2d');
     var W = canvas.width, H = canvas.height;
-    var cx = W/2, cy = H/2;
-    var maxRadius = Math.sqrt(cx*cx + cy*cy);
+    var cx = W/2, cy = H/2, maxRadius = Math.sqrt(cx*cx + cy*cy);
+    var swirlDirection = 1; // 1 = clockwise, -1 = counter-clockwise; re-rolled every round
 
     var DURATION_MS = 15000;
     var MAX_TURNS = 3.2;
     var UPDATE_INTERVAL_MS = 110;
+
+    // candidate swirl-center spots so the hidden/last-revealed area differs every round
+    var CENTER_CANDIDATES = ['center','topleft','topright','bottomleft','bottomright','random'];
+    function pickSwirlCenter(){
+      var choice = CENTER_CANDIDATES[Math.floor(Math.random()*CENTER_CANDIDATES.length)];
+      switch(choice){
+        case 'topleft': return { x: W*0.28, y: H*0.28 };
+        case 'topright': return { x: W*0.72, y: H*0.28 };
+        case 'bottomleft': return { x: W*0.28, y: H*0.72 };
+        case 'bottomright': return { x: W*0.72, y: H*0.72 };
+        case 'random': return { x: W*(0.2+Math.random()*0.6), y: H*(0.2+Math.random()*0.6) };
+        default: return { x: W/2, y: H/2 };
+      }
+    }
+    function farthestCornerDistance(px, py){
+      var corners = [[0,0],[W,0],[0,H],[W,H]];
+      var maxR = 0;
+      corners.forEach(function(c){
+        var dx = c[0]-px, dy = c[1]-py;
+        var d = Math.sqrt(dx*dx+dy*dy);
+        if(d > maxR) maxR = d;
+      });
+      return maxR;
+    }
 
     var NAMES = [
       'パトカー','しょうぼうしゃ','きゅうきゅうしゃ','はしごしゃ','ショベルカー',
@@ -1701,6 +1807,7 @@
     var timeBadge = document.getElementById('guruguruTimeBadge');
     var answerEl = document.getElementById('guruguruAnswer');
     var nextBtn = document.getElementById('guruguruNextBtn');
+    var revealBtn = document.getElementById('guruguruRevealBtn');
 
     var srcData = null, dxArr, dyArr, percentArr;
     var startTime = null, timerId = null, currentName = null;
@@ -1757,24 +1864,50 @@
       }catch(e){}
     }
 
-    function tick(){
-      var elapsed = Date.now() - startTime;
-      var t = Math.min(1, elapsed/DURATION_MS);
-      var eased = 1 - Math.pow(1-t, 3);
-      var strength = MAX_TURNS * 2*Math.PI * (1-eased);
-      renderFrame(strength);
-      var secLeft = Math.max(0, Math.ceil((DURATION_MS-elapsed)/1000));
-      timeNumEl.textContent = secLeft;
-      if(t >= 1){
-        clearInterval(timerId);
-        timerId = null;
-        renderFrame(0);
+    var completed = false;
+
+    function completeRound(withShatterEffect){
+      if(completed) return;
+      completed = true;
+      if(timerId){ clearInterval(timerId); timerId = null; }
+      timeNumEl.textContent = '0';
+      revealBtn.style.display = 'none';
+
+      function showAnswer(){
         answerEl.textContent = 'こたえ: ' + currentName;
         answerEl.classList.add('show');
         flashBubble(bubble, 'こたえは "' + currentName + '" だ！🎉');
         playCelebrationSound();
         speakAnswer(currentName);
         nextBtn.style.display = '';
+      }
+
+      if(withShatterEffect){
+        // don't draw the resolved photo onto the canvas yet - the shatter overlay
+        // is what shows it during the effect, so leave the canvas blank underneath
+        // to avoid the completed picture appearing twice at once
+        ctx.clearRect(0, 0, W, H);
+        var imgSrc = 'images/guruguru_' + encodeURIComponent(currentName) + '.png';
+        playShatterReassemble(document.getElementById('guruguruStage'), imgSrc, function(){
+          renderFrame(0); // now hand off to the canvas, matching what the overlay just showed
+          showAnswer();
+        });
+      } else {
+        renderFrame(0);
+        showAnswer();
+      }
+    }
+
+    function tick(){
+      var elapsed = Date.now() - startTime;
+      var t = Math.min(1, elapsed/DURATION_MS);
+      var eased = 1 - Math.pow(1-t, 3);
+      var strength = MAX_TURNS * 2*Math.PI * (1-eased) * swirlDirection;
+      renderFrame(strength);
+      var secLeft = Math.max(0, Math.ceil((DURATION_MS-elapsed)/1000));
+      timeNumEl.textContent = secLeft;
+      if(t >= 1){
+        completeRound(false); // natural timeout: reveal directly, no shatter effect
       }
     }
 
@@ -1786,10 +1919,12 @@
       window.speechSynthesis && window.speechSynthesis.cancel();
       roundId++;
       var myRound = roundId;
+      completed = false;
       currentName = NAMES[Math.floor(Math.random()*NAMES.length)];
       answerEl.classList.remove('show');
       answerEl.textContent = '';
       nextBtn.style.display = 'none';
+      revealBtn.style.display = '';
       timeBadge.style.display = '';
       flashBubble(bubble, 'なにが みえるかな？');
 
@@ -1805,6 +1940,10 @@
         ctx.fillRect(0,0,W,H);
         ctx.drawImage(img, 0, 0, img.width, img.height, dx0, dy0, dw, dh);
         srcData = ctx.getImageData(0, 0, W, H);
+        swirlDirection = Math.random() < 0.5 ? 1 : -1;
+        var center = pickSwirlCenter();
+        cx = center.x; cy = center.y;
+        maxRadius = farthestCornerDistance(cx, cy);
         precomputePixelGeometry();
         startTime = Date.now();
         tick();
@@ -1818,11 +1957,17 @@
     }
 
     nextBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); startRound(); });
+    revealBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      if(completed || timerId == null) return; // nothing to fast-forward to yet
+      completeRound(true); // manual reveal: play the shatter/reassemble effect
+    });
 
     window.resetGuruguruGame = function(){ startRound(); };
     window.cleanupGuruguru = function(){
       if(timerId){ clearInterval(timerId); timerId = null; }
       window.speechSynthesis && window.speechSynthesis.cancel();
+      document.querySelectorAll('#guruguruStage .shatter-wrap').forEach(function(w){ w.remove(); });
     };
   })();
 
