@@ -1635,10 +1635,19 @@
 </script>
 <script>
   if('serviceWorker' in navigator){
+    var swRegistration = null;
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('service-worker.js').catch(function(err){
+      navigator.serviceWorker.register('service-worker.js').then(function(reg){
+        swRegistration = reg;
+        reg.update();
+      }).catch(function(err){
         console.warn('service worker registration failed:', err);
       });
+    });
+    // iOS home-screen apps rarely re-check for updates on their own, so also
+    // force a check whenever the app is opened/foregrounded again
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible' && swRegistration){ swRegistration.update(); }
     });
     // when a newly-deployed service worker takes over, reload once so the
     // fresh version is actually shown instead of waiting for a second visit

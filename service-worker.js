@@ -4,7 +4,7 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v4';
+const CACHE_NAME = 'monster-cafe-v5';
 
 const PRECACHE_ASSETS = [
   "./",
@@ -144,6 +144,27 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
   if (event.request.method !== 'GET') return;
+
+  // Page loads (navigations) go network-first: iOS home-screen apps rarely
+  // re-check the service worker itself, so if we don't also fetch the HTML
+  // fresh on every open, an installed home-screen icon can stay stuck on an
+  // old version indefinitely. Falls back to the cached shell when offline.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        var responseClone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      }).catch(function() {
+        return caches.match(event.request).then(function(cached) {
+          return cached || caches.match('./index.html');
+        });
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(function(cached) {
