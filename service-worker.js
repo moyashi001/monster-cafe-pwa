@@ -4,7 +4,7 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v5';
+const CACHE_NAME = 'monster-cafe-v6';
 
 const PRECACHE_ASSETS = [
   "./",
@@ -61,6 +61,20 @@ const PRECACHE_ASSETS = [
   "./images/car_20_shadow.png",
   "./images/food_aburasoba.png",
   "./images/food_bomb.png",
+  "./images/guruguru_パトカー.png",
+  "./images/guruguru_しょうぼうしゃ.png",
+  "./images/guruguru_きゅうきゅうしゃ.png",
+  "./images/guruguru_はしごしゃ.png",
+  "./images/guruguru_ショベルカー.png",
+  "./images/guruguru_ブルドーザー.png",
+  "./images/guruguru_ダンプカー.png",
+  "./images/guruguru_クレーンしゃ.png",
+  "./images/guruguru_ミキサーしゃ.png",
+  "./images/guruguru_トラック.png",
+  "./images/guruguru_ゴミしゅうしゅうしゃ.png",
+  "./images/guruguru_カーキャリア.png",
+  "./images/guruguru_タンクローリー.png",
+  "./images/guruguru_ロードローラー.png",
   "./images/monster_angry.png",
   "./images/monster_eat.png",
   "./images/monster_happy.png",

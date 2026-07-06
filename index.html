@@ -162,6 +162,8 @@
   #btn-count{ background:linear-gradient(180deg,#6fb3ff,#2c6fce); }
   #btn-seal{ background:linear-gradient(180deg,#a3e08a,#4a9a4a); }
   #btn-car{ background:linear-gradient(180deg,#ffb066,#e2661a); }
+  #btn-guruguru{ background:linear-gradient(180deg,#5ce1c9,#1a9e8a); }
+  #app-version{ font-size:11px; color:rgba(255,255,255,.7); text-shadow:0 1px 0 rgba(0,0,0,.35); margin-top:2px; }
 
   /* ================= GAME 1: counting (conveyor + crow) ================= */
   .remaining-badge{
@@ -413,6 +415,29 @@
     box-shadow:0 6px 0 #8a5810; font-family:inherit; animation:dekitaPulse .8s ease-in-out infinite;
   }
   #puzzleNextBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(4px); }
+
+  /* ================= GAME 4: ぐるぐるクイズ (swirl-reveal photo quiz) ================= */
+  .guruguru-body{
+    flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:clamp(8px,2vh,14px); min-height:0; padding:6px;
+  }
+  #guruguruStage{
+    position:relative; width:clamp(280px,86vw,400px); aspect-ratio:4/3;
+    border-radius:16px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,.25); background:#fff;
+  }
+  #guruguruCanvas{ display:block; width:100%; height:100%; }
+  #guruguruAnswer{
+    font-size:clamp(20px,5.6vw,30px); font-weight:900; color:var(--red); text-align:center;
+    text-shadow:0 2px 0 rgba(0,0,0,.12); min-height:1.4em;
+    opacity:0; transform:scale(.7); transition:opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  #guruguruAnswer.show{ opacity:1; transform:scale(1); }
+  #guruguruNextBtn{
+    flex:0 0 auto; padding:10px 30px; font-size:clamp(15px,4vw,20px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,var(--mustard),#a9711c); border:none; border-radius:30px;
+    box-shadow:0 6px 0 #8a5810; font-family:inherit; animation:dekitaPulse .8s ease-in-out infinite;
+  }
+  #guruguruNextBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(4px); }
 </style>
 </head>
 <body>
@@ -423,7 +448,9 @@
     <div id="menu-title">モンスターの<br>ごはんタイム</div>
     <button class="menu-btn" id="btn-count"><span class="emoji">🍜</span>あぶらそばを かぞえよう！</button>
     <button class="menu-btn" id="btn-car"><span class="emoji">🚗</span>くるまの かたちあわせ</button>
+    <button class="menu-btn" id="btn-guruguru"><span class="emoji">🌀</span>ぐるぐるクイズ</button>
     <button class="menu-btn" id="btn-seal"><span class="emoji">📔</span>シールちょう</button>
+    <div id="app-version">v1.0.0</div>
   </div>
 
   <!-- ================= GAME 1: COUNTING ================= -->
@@ -502,6 +529,23 @@
       </div>
       <button id="puzzleShakeBtn">ふってスタート！</button>
       <button id="puzzleNextBtn" style="display:none;">つぎの くるま ▶</button>
+    </div>
+  </div>
+
+  <!-- ================= GAME 4: ぐるぐるクイズ ================= -->
+  <div id="screen-guruguru" class="screen">
+    <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div></div></div>
+    <div id="title">ぐるぐるクイズ</div>
+    <div class="guruguru-body">
+      <div class="speech-bubble" id="guruguruBubble">なにが みえるかな？</div>
+      <div class="remaining-badge" id="guruguruTimeBadge">
+        <span class="remaining-label">のこり</span>
+        <span class="remaining-num" id="guruguruTimeNum">15</span>
+        <span class="remaining-unit">びょう</span>
+      </div>
+      <div id="guruguruStage"><canvas id="guruguruCanvas" width="360" height="270"></canvas></div>
+      <div id="guruguruAnswer"></div>
+      <button id="guruguruNextBtn" style="display:none;">つぎの もんだい ▶</button>
     </div>
   </div>
 
@@ -640,14 +684,17 @@
   /* ===================== navigation ===================== */
   var screens = document.querySelectorAll('.screen');
   function showScreen(name){
+    if(name !== 'guruguru' && window.cleanupGuruguru){ window.cleanupGuruguru(); }
     screens.forEach(function(s){ s.classList.toggle('active', s.id === 'screen-'+name); });
     if(name === 'count'){ resetCountGame(); }
     if(name === 'seal'){ renderSealBoard(); }
     if(name === 'car'){ window.resetCarGame(); }
+    if(name === 'guruguru'){ window.resetGuruguruGame(); }
   }
   document.getElementById('btn-count').addEventListener('pointerdown', function(){ showScreen('count'); });
   document.getElementById('btn-seal').addEventListener('pointerdown', function(){ showScreen('seal'); });
   document.getElementById('btn-car').addEventListener('pointerdown', function(){ showScreen('car'); });
+  document.getElementById('btn-guruguru').addEventListener('pointerdown', function(){ showScreen('guruguru'); });
   document.querySelectorAll('[data-nav="menu"]').forEach(function(b){
     b.addEventListener('pointerdown', function(e){ e.stopPropagation(); showScreen('menu'); });
   });
@@ -1627,6 +1674,156 @@
       setTimeout(function(){ puzzleGuide.style.opacity = '.35'; puzzleGuideLines.style.opacity = '.9'; }, 50);
       setupMotion();
     }
+  })();
+
+  /* ===================================================================
+     GAME 4: ぐるぐるクイズ (swirl-reveal photo quiz, no sticker reward)
+     =================================================================== */
+  (function(){
+    var canvas = document.getElementById('guruguruCanvas');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var cx = W/2, cy = H/2;
+    var maxRadius = Math.sqrt(cx*cx + cy*cy);
+
+    var DURATION_MS = 15000;
+    var MAX_TURNS = 3.2;
+    var UPDATE_INTERVAL_MS = 110;
+
+    var NAMES = [
+      'パトカー','しょうぼうしゃ','きゅうきゅうしゃ','はしごしゃ','ショベルカー',
+      'ブルドーザー','ダンプカー','クレーンしゃ','ミキサーしゃ','トラック',
+      'ゴミしゅうしゅうしゃ','カーキャリア','タンクローリー','ロードローラー'
+    ];
+
+    var bubble = document.getElementById('guruguruBubble');
+    var timeNumEl = document.getElementById('guruguruTimeNum');
+    var timeBadge = document.getElementById('guruguruTimeBadge');
+    var answerEl = document.getElementById('guruguruAnswer');
+    var nextBtn = document.getElementById('guruguruNextBtn');
+
+    var srcData = null, dxArr, dyArr, percentArr;
+    var startTime = null, timerId = null, currentName = null;
+
+    function precomputePixelGeometry(){
+      var n = W*H;
+      dxArr = new Float32Array(n);
+      dyArr = new Float32Array(n);
+      percentArr = new Float32Array(n);
+      var idx = 0;
+      for(var y=0;y<H;y++){
+        for(var x=0;x<W;x++){
+          var dx = x-cx, dy = y-cy;
+          var r = Math.sqrt(dx*dx+dy*dy);
+          var percent = 1 - r/maxRadius;
+          if(percent < 0) percent = 0;
+          dxArr[idx]=dx; dyArr[idx]=dy;
+          percentArr[idx] = percent*percent;
+          idx++;
+        }
+      }
+    }
+
+    function renderFrame(strength){
+      var out = ctx.createImageData(W,H);
+      var src = srcData.data, dst = out.data;
+      var idx = 0;
+      for(var y=0;y<H;y++){
+        for(var x=0;x<W;x++){
+          var theta = strength * percentArr[idx];
+          var cosT = Math.cos(theta), sinT = Math.sin(theta);
+          var dx = dxArr[idx], dy = dyArr[idx];
+          var srcX = Math.round(cx + (dx*cosT - dy*sinT));
+          var srcY = Math.round(cy + (dx*sinT + dy*cosT));
+          if(srcX<0) srcX=0; else if(srcX>=W) srcX=W-1;
+          if(srcY<0) srcY=0; else if(srcY>=H) srcY=H-1;
+          var o = idx*4;
+          var s = (srcY*W+srcX)*4;
+          dst[o]=src[s]; dst[o+1]=src[s+1]; dst[o+2]=src[s+2]; dst[o+3]=src[s+3];
+          idx++;
+        }
+      }
+      ctx.putImageData(out, 0, 0);
+    }
+
+    function speakAnswer(name){
+      if(!('speechSynthesis' in window)) return;
+      try{
+        window.speechSynthesis.cancel();
+        var utter = new SpeechSynthesisUtterance(name);
+        utter.lang = 'ja-JP';
+        utter.rate = 0.9;
+        window.speechSynthesis.speak(utter);
+      }catch(e){}
+    }
+
+    function tick(){
+      var elapsed = Date.now() - startTime;
+      var t = Math.min(1, elapsed/DURATION_MS);
+      var eased = 1 - Math.pow(1-t, 3);
+      var strength = MAX_TURNS * 2*Math.PI * (1-eased);
+      renderFrame(strength);
+      var secLeft = Math.max(0, Math.ceil((DURATION_MS-elapsed)/1000));
+      timeNumEl.textContent = secLeft;
+      if(t >= 1){
+        clearInterval(timerId);
+        timerId = null;
+        renderFrame(0);
+        answerEl.textContent = 'こたえ: ' + currentName;
+        answerEl.classList.add('show');
+        flashBubble(bubble, 'こたえは "' + currentName + '" だ！🎉');
+        playCelebrationSound();
+        speakAnswer(currentName);
+        nextBtn.style.display = '';
+      }
+    }
+
+    var roundId = 0;
+
+    function startRound(){
+      ensureAudio();
+      if(timerId){ clearInterval(timerId); timerId = null; }
+      window.speechSynthesis && window.speechSynthesis.cancel();
+      roundId++;
+      var myRound = roundId;
+      currentName = NAMES[Math.floor(Math.random()*NAMES.length)];
+      answerEl.classList.remove('show');
+      answerEl.textContent = '';
+      nextBtn.style.display = 'none';
+      timeBadge.style.display = '';
+      flashBubble(bubble, 'なにが みえるかな？');
+
+      var img = new Image();
+      img.onload = function(){
+        if(myRound !== roundId) return; // a newer round started before this image finished loading
+        // "contain" fit: draw the whole illustration without cropping, letterboxed on
+        // whichever axis doesn't match the stage's aspect ratio
+        var scale = Math.min(W/img.width, H/img.height);
+        var dw = img.width*scale, dh = img.height*scale;
+        var dx0 = (W-dw)/2, dy0 = (H-dh)/2;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0,0,W,H);
+        ctx.drawImage(img, 0, 0, img.width, img.height, dx0, dy0, dw, dh);
+        srcData = ctx.getImageData(0, 0, W, H);
+        precomputePixelGeometry();
+        startTime = Date.now();
+        tick();
+        timerId = setInterval(tick, UPDATE_INTERVAL_MS);
+      };
+      img.onerror = function(){
+        if(myRound !== roundId) return;
+        flashBubble(bubble, 'がぞうが みつからないよ...');
+      };
+      img.src = 'images/guruguru_' + encodeURIComponent(currentName) + '.png';
+    }
+
+    nextBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); startRound(); });
+
+    window.resetGuruguruGame = function(){ startRound(); };
+    window.cleanupGuruguru = function(){
+      if(timerId){ clearInterval(timerId); timerId = null; }
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    };
   })();
 
   /* ===================== init ===================== */
