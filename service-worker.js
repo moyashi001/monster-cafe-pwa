@@ -4,7 +4,7 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v19';
+const CACHE_NAME = 'monster-cafe-v20';
 
 const PRECACHE_ASSETS = [
   "./",
@@ -33,6 +33,12 @@ const PRECACHE_ASSETS = [
   "./images/maze_obstacle_barricade.png",
   "./images/maze_obstacle_puddle.png",
   "./images/maze_start_station.png",
+  "./images/maze_bg_intermediate.png",
+  "./images/maze_car_police.png",
+  "./images/maze_start_police.png",
+  "./images/maze_goal_thief.png",
+  "./images/maze_goal_thief_caught.png",
+  "./images/maze_bridge.png",
   "./images/car_01.png",
   "./images/car_01_shadow.png",
   "./images/car_02.png",

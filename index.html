@@ -506,6 +506,11 @@
   #screen-maze{
     background-image:url('images/maze_bg.png'); background-size:cover; background-position:center;
   }
+  #mazeDifficultySelect{
+    flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:clamp(10px,2.6vh,18px); padding:10px;
+  }
+  #mazeDifficultySelect .menu-btn{ width:min(80vw,360px); }
   .maze-body{
     flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:clamp(8px,1.8vh,14px); min-height:0; padding:6px;
@@ -571,6 +576,24 @@
     35%{ transform:scale(1.25) translateY(-10px); opacity:1; }
     70%{ transform:scale(1) translateY(2px); opacity:1; }
     100%{ transform:scale(1.05) translateY(6px); opacity:0; }
+  }
+  .maze-effect.arrest{ animation:mazeEffectArrest .9s ease-in-out forwards; font-size:clamp(24px,8vw,36px); }
+  @keyframes mazeEffectArrest{
+    0%,100%{ opacity:0; }
+    10%,90%{ opacity:1; }
+    15%{ transform:scale(1) translateX(0); filter:hue-rotate(0deg); }
+    35%{ transform:scale(1.2) translateX(-6px); filter:hue-rotate(0deg) drop-shadow(0 0 8px #e63946); }
+    55%{ transform:scale(1.2) translateX(6px); filter:hue-rotate(0deg) drop-shadow(0 0 8px #2c6fce); }
+    75%{ transform:scale(1.1) translateX(-4px); filter:hue-rotate(0deg) drop-shadow(0 0 8px #e63946); }
+  }
+  .maze-cell.bridge{ box-shadow:inset 0 0 0 3px #7a4fd6; }
+  .maze-cell.bridge img.maze-cell-icon{ animation:mazeBridgeSpin 3s linear infinite; }
+  @keyframes mazeBridgeSpin{ 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+  #mazeCar.spin{ animation:mazeCarSpin .55s ease-in-out; }
+  @keyframes mazeCarSpin{
+    0%{ transform:rotate(0deg) scale(1); }
+    50%{ transform:rotate(200deg) scale(1.2); }
+    100%{ transform:rotate(360deg) scale(1); }
   }
   #mazeCar{
     position:absolute; width:25%; height:25%; display:flex; align-items:center; justify-content:center;
@@ -760,9 +783,16 @@
 
   <!-- ================= GAME 5: めいろ ================= -->
   <div id="screen-maze" class="screen">
-    <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div class="sticker-progress" id="mazeStageBadge">ステージ 1 / 3</div></div>
+    <div class="topbar"><button class="small-btn btn-back" id="mazeBackBtn">◀ もどる</button><div class="sticker-progress" id="mazeStageBadge">ステージ 1 / 3</div></div>
     <div id="title">ゴールまで いこう！</div>
-    <div class="maze-body">
+
+    <div id="mazeDifficultySelect">
+      <div class="speech-bubble">なんいどを えらんでね！</div>
+      <button class="menu-btn maze-diff-btn" data-mode="beginner" style="background:linear-gradient(180deg,#6fb3ff,#2c6fce);">しょきゅう</button>
+      <button class="menu-btn maze-diff-btn" data-mode="intermediate" style="background:linear-gradient(180deg,#a3e08a,#4a9a4a);">ちゅうきゅう</button>
+    </div>
+
+    <div class="maze-body" id="mazePlayArea" style="display:none;">
       <div class="speech-bubble" id="mazeBubble">やじるしで すすもう！</div>
       <div id="mazeBoardWrap">
         <div id="mazeBoard"></div>
@@ -2280,24 +2310,51 @@
 
   /* ===================== GAME 5: めいろ (grid maze) ===================== */
   (function(){
-    var START = [3,0], GOAL = [0,3]; // overwritten each generateMaze() call by pickStartGoal()
-    // Difficulty tiers - each regenerates a fresh random maze (see generateMaze).
-    // "branches" are plain dead-end road forks (no obstacle, just a wrong turn
-    // you back out of with もどる) - more of them means less bare grass and
-    // more decisions at each junction.
-    var DIFFICULTIES = [
-      { label:'しょきゅう', traps:1, branches:2 },
-      { label:'ちゅうきゅう', traps:2, branches:2 },
-      { label:'じょうきゅう', traps:3, branches:2 }
-    ];
-    var TOTAL_STAGES = DIFFICULTIES.length;
+    var MODES = {
+      beginner: {
+        label:'しょきゅう', gridSize:4, hasBridge:false,
+        bgImg:'images/maze_bg.png',
+        carImg:'images/maze_car.png', carAlt:'くるま',
+        startImg:'images/maze_start_station.png', startAlt:'スタート（しょうぼうしょ）',
+        goalImg:'images/maze_goal.png', goalSafeImg:'images/maze_goal_safe.png', goalAlt:'ゴール',
+        winEffect:'puddle',
+        winPreText:'しょうかだ！ みずを かけよう！',
+        winPostText:'やったね！ ひが きえたね！',
+        // "branches" are plain dead-end road forks (no obstacle, just a wrong
+        // turn you back out of with もどる) - more of them means less bare
+        // grass and more decisions at each junction.
+        stages: [
+          { label:'しょきゅう', traps:1, branches:2 },
+          { label:'ちゅうきゅう', traps:2, branches:2 },
+          { label:'じょうきゅう', traps:3, branches:2 }
+        ]
+      },
+      intermediate: {
+        label:'ちゅうきゅう', gridSize:5, hasBridge:true,
+        bgImg:'images/maze_bg_intermediate.png',
+        carImg:'images/maze_car_police.png', carAlt:'パトカー',
+        startImg:'images/maze_start_police.png', startAlt:'スタート（けいさつしょ）',
+        goalImg:'images/maze_goal_thief.png', goalSafeImg:'images/maze_goal_thief_caught.png', goalAlt:'ゴール（どろぼう）',
+        winEffect:'arrest',
+        winPreText:'たいほだ！',
+        winPostText:'やったね！ たいほ できたね！',
+        stages: [
+          { label:'1', traps:2, branches:5 },
+          { label:'2', traps:3, branches:5 },
+          { label:'3', traps:4, branches:5 }
+        ]
+      }
+    };
     var OBSTACLE_TYPES = ['barricade','puddle'];
     var OBSTACLE_ICON = { barricade:'images/maze_obstacle_barricade.png', puddle:'images/maze_obstacle_puddle.png' };
-    var OBSTACLE_EFFECT_EMOJI = { barricade:'💥', puddle:'💦' };
+    var EFFECT_EMOJI = { barricade:'💥', puddle:'💦', arrest:'🚨' };
 
+    var diffSelectEl = document.getElementById('mazeDifficultySelect');
+    var playAreaEl = document.getElementById('mazePlayArea');
     var boardEl = document.getElementById('mazeBoard');
     var boardWrapEl = document.getElementById('mazeBoardWrap');
     var carEl = document.getElementById('mazeCar');
+    var carImgEl = carEl.querySelector('img');
     var bubbleEl = document.getElementById('mazeBubble');
     var stageBadgeEl = document.getElementById('mazeStageBadge');
     var winPanelEl = document.getElementById('mazeWinPanel');
@@ -2310,21 +2367,28 @@
     var nextBtn = document.getElementById('mazeNextBtn');
     var replayBtn = document.getElementById('mazeReplayBtn');
     var screenEl = document.getElementById('screen-maze');
+    var backBtn = document.getElementById('mazeBackBtn');
 
+    var currentMode = null;
+    var GRID_SIZE = 4;
+    var START = [3,0], GOAL = [0,3]; // overwritten each generateMaze() call by pickStartGoal()
     var stageIndex = 0;
     var pathSet = null;    // Set of "r,c" cells that make up the solvable route (incl. start/goal)
     var edgeSet = null;    // Set of canonical "r,c|r,c" strings: legal moves between adjacent cells
     var trapCells = null;  // {"r,c": "barricade"|"puddle"}
     var pathEdgePairs = null; // [["r,c","r,c"], ...] consecutive solution-path links, for connector bridges
-    var goalImgEl = null;  // the <img> for the current goal cell, swapped to the "safe" building on win
+    var bridgeCell = null;    // "r,c" of the rotating-bridge cell, or null if this mode has none
+    var bridgeExits = null;   // {a:"r,c", b:"r,c"} - the bridge's two trail neighbors
+    var goalImgEl = null;  // the <img> for the current goal cell, swapped to the "safe" image on win
     var pos = null;        // {r,c}
     var history = [];      // stack of previous {r,c}
     var won = false;
-    var locked = false;    // true while a trap effect / reset animation is playing
+    var locked = false;    // true while a trap/bridge effect or reset animation is playing
 
+    function cfg(){ return MODES[currentMode]; }
     function key(r,c){ return r+','+c; }
     function edgeKey(a,b){ return a < b ? a+'|'+b : b+'|'+a; }
-    function inBounds(r,c){ return r>=0 && r<=3 && c>=0 && c<=3; }
+    function inBounds(r,c){ return r>=0 && r<GRID_SIZE && c>=0 && c<GRID_SIZE; }
     function shuffle(arr){
       for(var i=arr.length-1;i>0;i--){
         var j = Math.floor(Math.random()*(i+1));
@@ -2341,9 +2405,9 @@
     function pickStartGoal(){
       var s, g;
       do{
-        s = [Math.floor(Math.random()*4), Math.floor(Math.random()*4)];
-        g = [Math.floor(Math.random()*4), Math.floor(Math.random()*4)];
-      } while(manhattan(s,g) < 4);
+        s = [Math.floor(Math.random()*GRID_SIZE), Math.floor(Math.random()*GRID_SIZE)];
+        g = [Math.floor(Math.random()*GRID_SIZE), Math.floor(Math.random()*GRID_SIZE)];
+      } while(manhattan(s,g) < GRID_SIZE);
       START = s; GOAL = g;
     }
 
@@ -2387,9 +2451,33 @@
         pairs.push([trail[i], trail[i+1]]);
       }
 
+      // Rotating bridge gimmick (intermediate mode): pick an interior trail
+      // node - landing there auto-continues to the OTHER trail neighbor,
+      // which often isn't the direction you'd expect.
+      bridgeCell = null; bridgeExits = null;
+      if(cfg().hasBridge && trail.length >= 3){
+        var bi2 = 1 + Math.floor(Math.random()*(trail.length-2));
+        bridgeCell = trail[bi2];
+        bridgeExits = { a: trail[bi2-1], b: trail[bi2+1] };
+        // Fill in the bridge's remaining grid side(s) as plain dead-end road
+        // too, so all four directions around it look walkable - only the
+        // two trail sides actually lead anywhere; the rest are just a dead
+        // end you back out of, depending on which way you wandered in.
+        var bp = bridgeCell.split(','); var bR = +bp[0], bC = +bp[1];
+        gridNeighbors(bR,bC).forEach(function(nb){
+          var nk0 = key(nb[0], nb[1]);
+          if(!occupied[nk0]){
+            solutionSet[nk0] = true;
+            edges.add(edgeKey(bridgeCell, nk0));
+            pairs.push([bridgeCell, nk0]);
+            occupied[nk0] = true;
+          }
+        });
+      }
+
       var traps = {};
       var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
-      var trapWanted = DIFFICULTIES[stageIndex].traps;
+      var trapWanted = cfg().stages[stageIndex].traps;
       var trapCandidates = shuffle(trail.filter(function(k){ return k !== startKey && k !== goalKey; }));
       var trapsPlaced = 0;
       for(var ci=0; ci<trapCandidates.length && trapsPlaced<trapWanted; ci++){
@@ -2408,9 +2496,10 @@
       }
 
       // Plain dead-end road forks: look like more path, lead nowhere, no
-      // obstacle - just a wrong turn you back out of with もどる.
-      var branchWanted = DIFFICULTIES[stageIndex].branches;
-      var branchCandidates = shuffle(trail.slice());
+      // obstacle - just a wrong turn you back out of with もどる. (Excludes
+      // the bridge cell so its auto-continue direction stays unambiguous.)
+      var branchWanted = cfg().stages[stageIndex].branches;
+      var branchCandidates = shuffle(trail.filter(function(k){ return k !== bridgeCell; }));
       var branchesPlaced = 0;
       for(var bi=0; bi<branchCandidates.length && branchesPlaced<branchWanted; bi++){
         var bparts = branchCandidates[bi].split(','); var br = +bparts[0], bc = +bparts[1];
@@ -2435,15 +2524,18 @@
     }
 
     function buildBoard(){
+      boardEl.style.gridTemplateColumns = 'repeat(' + GRID_SIZE + ',minmax(0,1fr))';
+      boardEl.style.gridTemplateRows = 'repeat(' + GRID_SIZE + ',minmax(0,1fr))';
       boardEl.innerHTML = '';
       var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
       var cellEls = {};
-      for(var r=0;r<4;r++){
-        for(var c=0;c<4;c++){
+      for(var r=0;r<GRID_SIZE;r++){
+        for(var c=0;c<GRID_SIZE;c++){
           var cell = document.createElement('div');
           var k = key(r,c);
-          var looksLikeRoad = pathSet.has(k) || !!trapCells[k];
-          cell.className = 'maze-cell ' + (looksLikeRoad ? 'path' : 'empty');
+          // Every cell is a road tile now (no unused grass) - the fence pass
+          // below marks the boundaries you actually can't cross.
+          cell.className = 'maze-cell path';
           if(k === startKey){
             cell.classList.add('start');
             var label1 = document.createElement('span');
@@ -2451,8 +2543,8 @@
             cell.appendChild(label1);
             var flag = document.createElement('img');
             flag.className = 'maze-cell-icon';
-            flag.src = 'images/maze_start_station.png';
-            flag.alt = 'スタート（しょうぼうしょ）';
+            flag.src = cfg().startImg;
+            flag.alt = cfg().startAlt;
             cell.appendChild(flag);
           }
           if(k === goalKey){
@@ -2462,9 +2554,16 @@
             cell.appendChild(label2);
             goalImgEl = document.createElement('img');
             goalImgEl.className = 'maze-cell-icon';
-            goalImgEl.src = 'images/maze_goal.png';
-            goalImgEl.alt = 'ゴール';
+            goalImgEl.src = cfg().goalImg;
+            goalImgEl.alt = cfg().goalAlt;
             cell.appendChild(goalImgEl);
+          } else if(k === bridgeCell){
+            cell.classList.add('bridge');
+            var bridgeImg = document.createElement('img');
+            bridgeImg.className = 'maze-cell-icon';
+            bridgeImg.src = 'images/maze_bridge.png';
+            bridgeImg.alt = 'かいてんばし';
+            cell.appendChild(bridgeImg);
           } else if(trapCells[k]){
             var obsImg = document.createElement('img');
             obsImg.className = 'maze-cell-icon';
@@ -2488,28 +2587,24 @@
         var top = Math.min(a.top, b.top) - boardRect.top;
         var right = Math.max(a.right, b.right) - boardRect.left;
         var bottom = Math.max(a.bottom, b.bottom) - boardRect.top;
-        var bridge = document.createElement('div');
-        bridge.className = 'maze-connector';
-        bridge.style.left = left + 'px';
-        bridge.style.top = top + 'px';
-        bridge.style.width = (right-left) + 'px';
-        bridge.style.height = (bottom-top) + 'px';
-        boardEl.appendChild(bridge);
+        var conn = document.createElement('div');
+        conn.className = 'maze-connector';
+        conn.style.left = left + 'px';
+        conn.style.top = top + 'px';
+        conn.style.width = (right-left) + 'px';
+        conn.style.height = (bottom-top) + 'px';
+        boardEl.appendChild(conn);
       });
-      // Any two grid-adjacent "occupied-looking" cells (path or trap) that
+      // Every cell is a road tile now, so any two grid-adjacent cells that
       // AREN'T bridged above have no legal move between them - mark that
       // boundary with a little fence so it reads as blocked, not just empty.
-      for(var r2=0; r2<4; r2++){
-        for(var c2=0; c2<4; c2++){
+      for(var r2=0; r2<GRID_SIZE; r2++){
+        for(var c2=0; c2<GRID_SIZE; c2++){
           var k2 = key(r2,c2);
-          var occupied2 = pathSet.has(k2) || trapCells[k2];
-          if(!occupied2) continue;
           [[r2+1,c2],[r2,c2+1]].forEach(function(nb){
             var nr = nb[0], nc = nb[1];
             if(!inBounds(nr,nc)) return;
             var nk = key(nr,nc);
-            var occupiedN = pathSet.has(nk) || trapCells[nk];
-            if(!occupiedN) return;
             if(edgeSet.has(edgeKey(k2,nk))) return; // legal move - already bridged
             var elA = cellEls[k2], elB = cellEls[nk];
             if(!elA || !elB) return;
@@ -2534,8 +2629,11 @@
 
     function placeCar(animate){
       carEl.style.transition = animate ? '' : 'none';
-      carEl.style.left = (pos.c * 25) + '%';
-      carEl.style.top = (pos.r * 25) + '%';
+      var step = 100/GRID_SIZE;
+      carEl.style.width = step + '%';
+      carEl.style.height = step + '%';
+      carEl.style.left = (pos.c * step) + '%';
+      carEl.style.top = (pos.r * step) + '%';
       if(!animate){ void carEl.offsetWidth; carEl.style.transition = ''; }
     }
 
@@ -2548,16 +2646,24 @@
     function celebrate(){
       won = true;
       setControlsEnabled(false);
-      bubbleEl.textContent = 'しょうかだ！ みずを かけよう！';
-      showEffect(GOAL[0], GOAL[1], 'puddle');
-      beep(520, 0.1, 0, 'sine', 0.2);
-      beep(600, 0.12, 0.1, 'sine', 0.2);
-      beep(680, 0.14, 0.2, 'sine', 0.18);
+      var c = cfg();
+      bubbleEl.textContent = c.winPreText;
+      showEffect(GOAL[0], GOAL[1], c.winEffect);
+      if(c.winEffect === 'arrest'){
+        beep(700, 0.08, 0, 'square', 0.2);
+        beep(500, 0.08, 0.12, 'square', 0.2);
+        beep(700, 0.08, 0.24, 'square', 0.2);
+        beep(500, 0.08, 0.36, 'square', 0.2);
+      } else {
+        beep(520, 0.1, 0, 'sine', 0.2);
+        beep(600, 0.12, 0.1, 'sine', 0.2);
+        beep(680, 0.14, 0.2, 'sine', 0.18);
+      }
       setTimeout(function(){
-        if(goalImgEl){ goalImgEl.src = 'images/maze_goal_safe.png'; }
+        if(goalImgEl){ goalImgEl.src = c.goalSafeImg; }
         carEl.classList.add('win');
-        var isLast = stageIndex >= TOTAL_STAGES-1;
-        bubbleEl.textContent = isLast ? 'すごい！ ぜんぶ クリア できたね！' : 'やったね！ ひが きえたね！';
+        var isLast = stageIndex >= c.stages.length-1;
+        bubbleEl.textContent = isLast ? 'すごい！ ぜんぶ クリア できたね！' : c.winPostText;
         nextBtn.hidden = isLast;
         replayBtn.textContent = isLast ? 'さいしょから あそぶ🎉' : 'もういちど あそぶ🎉';
         winPanelEl.classList.add('show');
@@ -2569,9 +2675,12 @@
     function showEffect(r, c, type){
       var el = document.createElement('div');
       el.className = 'maze-effect ' + type;
-      el.textContent = OBSTACLE_EFFECT_EMOJI[type] || '💥';
-      el.style.left = (c * 25) + '%';
-      el.style.top = (r * 25) + '%';
+      el.textContent = EFFECT_EMOJI[type] || '💥';
+      var step = 100/GRID_SIZE;
+      el.style.width = step + '%';
+      el.style.height = step + '%';
+      el.style.left = (c * step) + '%';
+      el.style.top = (r * step) + '%';
       boardWrapEl.appendChild(el);
       setTimeout(function(){ el.remove(); }, 750);
     }
@@ -2604,6 +2713,31 @@
       }, 700);
     }
 
+    // Riding onto the rotating bridge: land on it, spin, then automatically
+    // continue out the OTHER trail direction (often not the one you pressed).
+    function crossBridge(arrivedFromKey){
+      locked = true;
+      setControlsEnabled(false);
+      beep(520, 0.1, 0, 'triangle', 0.16);
+      setTimeout(function(){
+        carEl.classList.remove('spin'); void carEl.offsetWidth; carEl.classList.add('spin');
+        beep(300, 0.12, 0, 'sawtooth', 0.16);
+        beep(500, 0.12, 0.1, 'sawtooth', 0.16);
+        beep(700, 0.14, 0.2, 'sawtooth', 0.16);
+        bubbleEl.textContent = 'ぐるぐる〜！ どっちに でるかな？';
+        setTimeout(function(){
+          var exitKey = (arrivedFromKey === bridgeExits.a) ? bridgeExits.b : bridgeExits.a;
+          var ep = exitKey.split(',');
+          pos = { r: +ep[0], c: +ep[1] };
+          placeCar(true);
+          bubbleEl.textContent = 'やじるしで すすもう！';
+          locked = false;
+          setControlsEnabled(true);
+          if(isGoal()){ setTimeout(celebrate, 320); }
+        }, 550);
+      }, 350);
+    }
+
     function tryMove(dr,dc,bx,by){
       if(won || locked) return;
       ensureAudio();
@@ -2624,6 +2758,10 @@
       history.push({ r: pos.r, c: pos.c });
       pos = { r: nr, c: nc };
       placeCar(true);
+      if(nk === bridgeCell){
+        crossBridge(curKey);
+        return;
+      }
       beep(520, 0.1, 0, 'triangle', 0.16);
       if(isGoal()){ setTimeout(celebrate, 320); }
     }
@@ -2688,13 +2826,29 @@
     hintBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); hint(); });
     replayBtn.addEventListener('pointerdown', function(e){
       e.stopPropagation();
-      if(stageIndex >= TOTAL_STAGES-1 && won){ stageIndex = 0; }
+      if(stageIndex >= cfg().stages.length-1 && won){ stageIndex = 0; }
       startStage();
     });
     nextBtn.addEventListener('pointerdown', function(e){
       e.stopPropagation();
-      if(stageIndex < TOTAL_STAGES-1) stageIndex++;
+      if(stageIndex < cfg().stages.length-1) stageIndex++;
       startStage();
+    });
+    document.querySelectorAll('.maze-diff-btn').forEach(function(btn){
+      btn.addEventListener('pointerdown', function(e){
+        e.stopPropagation();
+        startMode(btn.dataset.mode);
+      });
+    });
+    backBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      if(playAreaEl.style.display !== 'none'){
+        // mid-game -> back to this game's difficulty select
+        diffSelectEl.style.display = '';
+        playAreaEl.style.display = 'none';
+      } else {
+        showScreen('menu');
+      }
     });
 
     function startStage(){
@@ -2703,7 +2857,8 @@
       history = [];
       won = false;
       locked = false;
-      stageBadgeEl.textContent = 'ステージ ' + (stageIndex+1) + ' / ' + TOTAL_STAGES + '（' + DIFFICULTIES[stageIndex].label + '）';
+      var c = cfg();
+      stageBadgeEl.textContent = 'ステージ ' + (stageIndex+1) + ' / ' + c.stages.length + '（' + c.label + '）';
       bubbleEl.textContent = 'やじるしで すすもう！';
       winPanelEl.classList.remove('show');
       carEl.classList.remove('win');
@@ -2712,7 +2867,24 @@
       placeCar(false);
     }
 
-    window.resetMazeGame = function(){ stageIndex = 0; startStage(); };
+    function startMode(mode){
+      currentMode = mode;
+      var c = cfg();
+      GRID_SIZE = c.gridSize;
+      stageIndex = 0;
+      screenEl.style.backgroundImage = "url('" + c.bgImg + "')";
+      carImgEl.src = c.carImg;
+      carImgEl.alt = c.carAlt;
+      diffSelectEl.style.display = 'none';
+      playAreaEl.style.display = '';
+      startStage();
+    }
+
+    window.resetMazeGame = function(){
+      // entering the maze screen from the menu always starts at the difficulty select
+      diffSelectEl.style.display = '';
+      playAreaEl.style.display = 'none';
+    };
   })();
 
   /* ===================== init ===================== */

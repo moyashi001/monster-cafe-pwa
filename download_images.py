@@ -219,6 +219,32 @@ def build_image_manifest():
         "bold thick black outline, isolated on plain white background, no shadow, no scenery"
     )
 
+    # 8) maze game intermediate tier (police theme, 5x5 grid)
+    images["maze_bg_intermediate.png"] = (
+        "A 2D children's maze game, 5x5 grid, police car start, police station goal, pastel town background, "
+        "playful style, no grid lines, no characters"
+    )
+    images["maze_car_police.png"] = (
+        "a cute simple black and white police car icon with a light bar on the roof, top-down view, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_start_police.png"] = (
+        "a cute cartoon police station building with a blue lamp sign and small tower, bold thick black outline, "
+        "isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_goal_thief.png"] = (
+        "a cute cartoon sneaky thief character wearing a striped shirt and eye mask, holding a money bag, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_goal_thief_caught.png"] = (
+        "a cute cartoon thief character wearing handcuffs, sitting sad but safe, striped shirt and eye mask, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_bridge.png"] = (
+        "a cute cartoon spinning turntable bridge icon with curved arrows showing rotation, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
+
     return images
 
 
@@ -301,6 +327,11 @@ MAZE_ICON_FILES = [
     "maze_obstacle_barricade.png",
     "maze_obstacle_puddle.png",
     "maze_start_station.png",
+    "maze_car_police.png",
+    "maze_start_police.png",
+    "maze_goal_thief.png",
+    "maze_goal_thief_caught.png",
+    "maze_bridge.png",
 ]
 
 
