@@ -79,55 +79,74 @@ def build_image_manifest():
         "for a girl's sticker album"
     )
 
-    # 5) 50 reward stickers: Pokemon-style creature pairs (angel / devil) per element,
-    # in the visual style of 1980s Bikkuriman prism stickers (esp. the angel-vs-devil series).
-    # Frame (prism/gold emboss) and character name/catchphrase text are rendered separately
-    # in the app's own CSS/HTML, so these prompts focus purely on the character + background art.
+    # 5) 50 reward stickers: Pokemon-style 3-stage evolution lines. Each line has
+    # an elemental type + a cute animal/plant motif, drawn through 3 evolution
+    # stages (stage 1 cute/small -> stage 2 energetic/medium -> stage 3 powerful/
+    # cool), following the "diverse creature characters ... different evolutionary
+    # stages" brief. 16 lines x 3 stages = 48, plus one 2-stage bonus "legendary"
+    # line = 50. Character name/catchphrase text is rendered separately in the
+    # app's own CSS/HTML, so these prompts focus purely on the character art.
     STICKER_STYLE = (
-        ", 1980s Bikkuriman sticker series art style, deformed chibi character design, "
-        "slightly rough pixelated dot-art texture, nostalgic retro color palette, "
-        "comically exaggerated facial expression, silly derpy pose, centered composition "
-        "filling the frame, simple background matching the theme, no text, no watermark"
+        ", cartoon style, thick clear black outlines, vibrant flat colors, "
+        "simple cel shading, cheerful appealing character design, distinct silhouette, "
+        "centered composition filling the frame, plain white background, no text, no watermark"
     )
-    ANGEL_LOOK = "with small feathery white angel wings and a glowing halo, cheerful triumphant pose"
-    DEVIL_LOOK = "with small bat wings and tiny curled horns, mischievous sneaky pose"
 
-    elements = [
-        ("flame patterns, warm orange and red glowing aura", "fire"),
-        ("icy crystal patterns, pale blue frost aura", "ice"),
-        ("yellow lightning bolt patterns, electric sparks", "thunder"),
-        ("swirling wind ribbons, pale green breeze aura", "wind"),
-        ("brown rocky terrain patterns with pebbles", "earth"),
-        ("blue water droplet patterns, splashing waves", "water"),
-        ("golden glowing light rays and sparkles", "light"),
-        ("deep purple shadowy wisps, glowing eyes in the dark", "dark"),
-        ("twinkling stars pattern, night sky sparkle", "star"),
-        ("crescent moon motif, pale silver glow", "moon"),
-        ("bright sun rays, warm yellow glow", "sun"),
-        ("blooming flower petals pattern, pastel garden colors", "flower"),
-        ("green leaves and vines pattern, woodland colors", "forest"),
-        ("ocean wave pattern, teal blue colors", "sea"),
-        ("rocky mountain peaks pattern, grey and white snow cap", "mountain"),
-        ("fluffy cloud pattern, soft white and blue sky", "cloud"),
-        ("rainbow stripes pattern, multicolor prism", "rainbow"),
-        ("desert dune pattern, tan and gold sand", "sand"),
-        ("musical note pattern, colorful sound waves", "sound"),
-        ("dreamy pastel swirl pattern, soft clouds and stars", "dream"),
-        ("shiny reflective mirror shard pattern, silver glints", "mirror"),
-        ("sparkling gemstone pattern, jewel facets", "gem"),
-        ("icy glacier crystal pattern, deep blue ice", "glacier"),
-        ("sharp zigzag lightning pattern, electric yellow-purple", "lightning bolt"),
-        ("swirling storm cloud pattern, dark grey with lightning", "storm"),
+    STAGE_DESC = {
+        1: "cute and small, chibi proportions, big round sparkling eyes, playful pose",
+        2: "energetic and medium-sized, active dynamic pose, confident expression",
+        3: "powerful and cool, larger and more detailed, majestic heroic pose",
+    }
+
+    def stage_prompt(type_label, motif, aura, stage_num, stage_desc):
+        return "Design stage {} of a {}-type monster based on a {}. {}, {}".format(
+            stage_num, type_label, motif, stage_desc, aura
+        )
+
+    # (type_label, motif, aura/texture description)
+    evolution_lines = [
+        ("fire", "kitten", "warm orange and red glowing ember aura"),
+        ("water", "turtle", "cool blue water droplet aura, glossy wet sheen"),
+        ("grass", "seedling plant creature", "fresh green leaf and vine motifs"),
+        ("electric", "chick", "yellow lightning spark aura"),
+        ("rock", "armadillo with a shell", "rugged grey stone texture with small pebbles"),
+        ("flying", "hawk", "soft cloud and wind swirl motifs"),
+        ("ice", "penguin", "pale blue frost crystal aura"),
+        ("ground", "mole", "brown earthy soil texture"),
+        ("bug", "caterpillar", "shiny iridescent shell texture"),
+        ("fairy", "rabbit", "soft pastel glowing light sparkles"),
+        ("dark", "fox", "deep purple shadowy wisps"),
+        ("dragon", "little lizard", "shimmering scale texture with small flame wisps"),
+        ("steel", "hedgehog", "metallic shiny silver texture"),
+        ("psychic", "owl", "swirling pastel psychic energy rings"),
+        ("poison", "frog", "playful bubbly purple and teal bubble motifs"),
+        ("wind", "squirrel", "swirling pale green breeze ribbons"),
     ]
-    assert len(elements) == 25
+    assert len(evolution_lines) == 16
 
     i = 1
-    for visual, theme_name in elements:
-        base = "cute chubby round Pokemon-style creature themed around {}".format(visual)
-        images["seal_{:02d}.png".format(i)] = base + ", " + ANGEL_LOOK + STICKER_STYLE
-        i += 1
-        images["seal_{:02d}.png".format(i)] = base + ", " + DEVIL_LOOK + STICKER_STYLE
-        i += 1
+    for type_label, motif, aura in evolution_lines:
+        for stage in (1, 2, 3):
+            images["seal_{:02d}.png".format(i)] = (
+                stage_prompt(type_label, motif, aura, stage, STAGE_DESC[stage]) + STICKER_STYLE
+            )
+            i += 1
+
+    # Bonus 2-stage "legendary" line (cute pup -> starry legendary wolf) to
+    # round the total out to exactly 50 stickers.
+    images["seal_{:02d}.png".format(i)] = (
+        stage_prompt("star", "wolf pup", "twinkling starry night sky sparkle", 1, STAGE_DESC[1])
+        + STICKER_STYLE
+    )
+    i += 1
+    images["seal_{:02d}.png".format(i)] = (
+        stage_prompt(
+            "star", "wolf pup", "twinkling starry night sky sparkle, glowing cosmic aura", 2,
+            "powerful and cool, majestic legendary appearance, larger and more detailed, heroic confident pose",
+        )
+        + STICKER_STYLE
+    )
+    i += 1
     assert i - 1 == 50
 
     # 6) 10 cars for the shape-matching game (game 3). Side view / profile is
@@ -158,6 +177,47 @@ def build_image_manifest():
     ]
     for filename, prompt in car_subjects:
         images[filename + ".png"] = prompt + ", side view, profile view, isolated on plain white background, no shadow, no scenery, no background objects"
+
+    # 7) maze game (game 5) assets. The two tile textures (road/grass) are used
+    # as opaque per-cell background images; the rest are isolated icons that
+    # make_maze_icons_transparent() below cuts out to transparent PNGs so they
+    # can sit on top of the tiles and the town/grass scene background.
+    images["maze_bg.png"] = (
+        "a cheerful pop art bird's-eye view of a small town with green grassy fields, "
+        "a few colorful houses and trees scattered around, simple flat shapes, no grid, no road, no characters"
+    )
+    images["maze_road_tile.png"] = (
+        "a single top-down square asphalt road tile texture with a white dashed center line, "
+        "flat simple design, seamless, no cars, no scenery"
+    )
+    images["maze_grass_tile.png"] = (
+        "a single top-down square grassy meadow tile texture with a few small flowers and leaf details, "
+        "flat simple design, seamless, no cars, no scenery"
+    )
+    images["maze_car.png"] = (
+        "a cute simple red fire truck icon, top-down view, bold thick black outline, "
+        "isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_goal.png"] = (
+        "a cute cartoon small building on fire with bright orange flames on the roof, bold thick black outline, "
+        "isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_obstacle_barricade.png"] = (
+        "a cute cartoon orange and white striped road barricade traffic barrier, bold thick black outline, "
+        "isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_obstacle_puddle.png"] = (
+        "a cute cartoon blue water puddle splash with small droplets, bold thick black outline, "
+        "isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_start_station.png"] = (
+        "a cute cartoon red fire station building with a big garage door and a small tower, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
+    images["maze_goal_safe.png"] = (
+        "a cute cartoon small building, safe and calm, freshly rescued, no fire, no smoke, tidy and bright, "
+        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    )
 
     return images
 
@@ -234,6 +294,55 @@ def make_car_shadows():
             print("  FAILED to build shadow for {}: {}".format(src, e))
 
 
+MAZE_ICON_FILES = [
+    "maze_car.png",
+    "maze_goal.png",
+    "maze_goal_safe.png",
+    "maze_obstacle_barricade.png",
+    "maze_obstacle_puddle.png",
+    "maze_start_station.png",
+]
+
+
+def make_maze_icons_transparent():
+    """Cuts the plain white background out of each file in MAZE_ICON_FILES,
+    turning it into a transparent-background icon in place. Unlike
+    make_car_shadows() above, this keeps the original colors/detail (it's not
+    building a solid silhouette) - it just erases pixels close to the
+    background corner color, with a soft-edged alpha falloff so the cut edge
+    isn't jagged."""
+    try:
+        import numpy as np
+        from PIL import Image
+    except ImportError:
+        print("\n(numpy/Pillow not installed - skipping maze icon transparency cutout.")
+        print(" Run: pip install numpy pillow   then re-run this script.)")
+        return
+
+    inner_tol = 30   # below this distance from bg color: fully transparent
+    outer_tol = 70   # above this distance: fully opaque; between is a soft edge
+
+    for filename in MAZE_ICON_FILES:
+        path = os.path.join(OUT_DIR, filename)
+        if not os.path.exists(path):
+            continue
+        try:
+            img = Image.open(path).convert("RGB")
+            rgb = np.array(img).astype(np.float64)
+            h, w = rgb.shape[0], rgb.shape[1]
+            corners = np.array([rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]])
+            bg = corners.mean(axis=0)
+            dist = np.sqrt(((rgb - bg) ** 2).sum(axis=2))
+
+            alpha = np.clip((dist - inner_tol) / (outer_tol - inner_tol), 0, 1) * 255
+
+            out = np.dstack([rgb, alpha]).astype(np.uint8)
+            Image.fromarray(out, "RGBA").save(path)
+            print("  OK: {} (background cut to transparent)".format(filename))
+        except Exception as e:
+            print("  FAILED to cut background for {}: {}".format(filename, e))
+
+
 def download_one(filename, prompt, retries=RETRIES, base_delay=RETRY_BASE_DELAY):
     out_path = os.path.join(OUT_DIR, filename)
     if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
@@ -292,6 +401,9 @@ def main():
 
     print("\nBuilding car shadow silhouettes (game 3)...")
     make_car_shadows()
+
+    print("\nCutting maze icons (game 5) to transparent...")
+    make_maze_icons_transparent()
 
     if failed:
         sys.exit(1)

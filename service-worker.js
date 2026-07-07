@@ -4,12 +4,16 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v6';
+const CACHE_NAME = 'monster-cafe-v19';
 
 const PRECACHE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./assets/images/btn_car.png",
+  "./assets/images/btn_guruguru.png",
+  "./assets/images/btn_seal.png",
+  "./assets/images/title.png",
   "./icons/icon-120.png",
   "./icons/icon-152.png",
   "./icons/icon-167.png",
@@ -19,6 +23,15 @@ const PRECACHE_ASSETS = [
   "./images/bg_menu.png",
   "./images/bg_seal_boy.png",
   "./images/bg_seal_girl.png",
+  "./images/maze_bg.png",
+  "./images/maze_road_tile.png",
+  "./images/maze_grass_tile.png",
+  "./images/maze_car.png",
+  "./images/maze_goal.png",
+  "./images/maze_goal_safe.png",
+  "./images/maze_obstacle_barricade.png",
+  "./images/maze_obstacle_puddle.png",
+  "./images/maze_start_station.png",
   "./images/car_01.png",
   "./images/car_01_shadow.png",
   "./images/car_02.png",

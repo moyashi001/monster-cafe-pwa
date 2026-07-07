@@ -143,15 +143,50 @@
     100%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); opacity:0; }
   }
 
-  /* ================= MENU ================= */
+  /* ================= MENU (picture-book forest theme) ================= */
   #screen-menu{
-    align-items:center; justify-content:center; gap:clamp(10px,3vh,22px); padding:16px;
+    align-items:center; justify-content:flex-start; overflow:hidden;
+    gap:clamp(10px,2.4vh,18px); padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 14px;
     background-image:url('images/bg_menu.png'); background-size:cover; background-position:center;
   }
-  #menu-title{
-    font-size:clamp(26px,7.5vw,44px); font-weight:bold; color:#fff; text-align:center;
-    text-shadow:0 3px 0 rgba(0,0,0,.3), 0 0 14px rgba(0,0,0,.5); letter-spacing:2px;
+  #menu-title-wrap{ position:relative; width:100%; max-width:380px; flex:0 0 auto; }
+  #menu-title-img{ display:block; width:100%; height:auto; }
+  #home-cards{
+    position:relative; z-index:1; flex:1 1 auto; width:100%; max-width:400px;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(10px,2vh,16px); min-height:0;
   }
+  .home-card{
+    position:relative; border:none; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; gap:clamp(12px,3.2vw,18px); padding:clamp(8px,1.6vh,12px) clamp(14px,3.6vw,20px);
+    border-radius:50px; background:#fff8ea;
+    box-shadow:0 6px 0 rgba(0,0,0,.15), 0 8px 12px rgba(0,0,0,.14);
+    flex:0 0 auto;
+  }
+  .home-card:active{ box-shadow:0 2px 0 rgba(0,0,0,.15); transform:translateY(4px); }
+  .home-card-image:active{ box-shadow:none; }
+  .home-card.bounce{ animation:cardPoyon .5s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes cardPoyon{
+    0%{ transform:scale(1); }
+    30%{ transform:scale(.9,1.16); }
+    55%{ transform:scale(1.18,.87); }
+    78%{ transform:scale(.95,1.06); }
+    100%{ transform:scale(1); }
+  }
+  .home-card-badge{
+    flex:0 0 auto; width:clamp(46px,13vw,64px); height:clamp(46px,13vw,64px); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:clamp(24px,7vw,34px); line-height:1;
+    box-shadow:inset 0 -3px 6px rgba(0,0,0,.14), 0 2px 4px rgba(0,0,0,.18);
+  }
+  .home-card-label{
+    font-size:clamp(14px,4vw,18px); font-weight:900; color:var(--ink); text-align:left; line-height:1.3;
+  }
+  #btn-count .home-card-badge{ background:#ffb066; }
+  #btn-maze .home-card-badge{ background:#6fb3ff; }
+  .home-card-image{ background:none; box-shadow:none; padding:0; border-radius:0; width:100%; }
+  .home-card-img{ display:block; width:100%; height:auto; }
+  #app-version{ position:relative; z-index:1; font-size:11px; color:rgba(255,255,255,.9); text-shadow:0 1px 2px rgba(0,0,0,.4); margin-top:2px; flex:0 0 auto; }
+
+  /* shared pill-button style, used by the difficulty-select and puzzle-mode screens */
   .menu-btn{
     width:min(88vw,460px); padding:clamp(14px,3.2vh,22px) 20px; border:none; border-radius:26px;
     font-family:inherit; font-weight:bold; font-size:clamp(15px,4.2vw,22px); color:#fff; text-align:center;
@@ -159,11 +194,6 @@
   }
   .menu-btn .emoji{ font-size:1.4em; }
   .menu-btn:active{ box-shadow:0 3px 0 rgba(0,0,0,.25); transform:translateY(5px); }
-  #btn-count{ background:linear-gradient(180deg,#6fb3ff,#2c6fce); }
-  #btn-seal{ background:linear-gradient(180deg,#a3e08a,#4a9a4a); }
-  #btn-car{ background:linear-gradient(180deg,#ffb066,#e2661a); }
-  #btn-guruguru{ background:linear-gradient(180deg,#5ce1c9,#1a9e8a); }
-  #app-version{ font-size:11px; color:rgba(255,255,255,.7); text-shadow:0 1px 0 rgba(0,0,0,.35); margin-top:2px; }
 
   /* ================= GAME 1: counting (conveyor + crow) ================= */
   .remaining-badge{
@@ -238,21 +268,12 @@
   }
 
   /* ================= SEAL ALBUM ================= */
-  #screen-seal .seal-bg-buttons{ flex:0 0 auto; display:flex; gap:10px; justify-content:center; padding:6px 0; }
-  .seal-bg-btn{
-    border:3px solid #fff; border-radius:16px; padding:4px 14px 6px; cursor:pointer;
-    box-shadow:0 3px 0 rgba(0,0,0,.2); background:rgba(255,255,255,.55);
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-    font-family:inherit; font-weight:bold; font-size:clamp(10px,2.6vw,13px); color:var(--ink);
-  }
-  .seal-bg-btn img{ width:clamp(36px,9vw,52px); height:clamp(36px,9vw,52px); object-fit:cover; border-radius:10px; }
-  .seal-bg-btn.selected{ border-color:var(--red); background:rgba(255,255,255,.9); transform:scale(1.06); }
   #seal-board-wrap{ flex:1 1 auto; overflow-y:auto; padding:6px 10px 14px; }
   #seal-board{
     display:grid; grid-template-columns:repeat(5,1fr); gap:8px;
     background-size:cover; background-position:center; border-radius:16px; padding:10px;
   }
-  .seal-cell{ position:relative; aspect-ratio:1; }
+  .seal-cell{ position:relative; aspect-ratio:1; cursor:pointer; }
   .seal-cell.locked{ background:rgba(255,255,255,.4); border-radius:16%; }
   .seal-cell.locked img{ width:100%; height:100%; object-fit:contain; opacity:.28; filter:grayscale(85%); padding:10%; box-sizing:border-box; }
 
@@ -316,6 +337,37 @@
   }
   #stickerReveal.show #stickerRevealCloseBtn{ opacity:1; }
   #stickerRevealCloseBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(3px); }
+
+  /* ---- sticker detail view (tap an owned sticker in the album to enlarge it) ---- */
+  #stickerDetailView{
+    position:fixed; inset:0; z-index:300; padding:20px; box-sizing:border-box;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(60,20,10,.55);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  #stickerDetailView.show{ opacity:1; pointer-events:auto; }
+  .sticker-popup-card{
+    position:relative; width:min(78vw,320px); max-width:100%; box-sizing:border-box;
+    background:var(--cream); border-radius:28px; padding:22px 16px 16px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    transform:scale(.6); opacity:0; transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+  }
+  #stickerDetailView.show .sticker-popup-card{ transform:scale(1); opacity:1; }
+  .sticker-popup-card .sticker-card-big{ width:min(50vw,190px); height:min(50vw,190px); transform:none; }
+  .sticker-popup-card .sticker-reveal-name{
+    color:var(--ink); text-shadow:none; transform:none; opacity:1; letter-spacing:.5px;
+  }
+  .sticker-popup-card .sticker-reveal-phrase{
+    color:var(--ink); text-shadow:none; opacity:1; max-width:100%;
+  }
+  #stickerDetailCloseBtn{
+    position:absolute; top:-14px; right:-10px;
+    width:36px; height:36px; border-radius:50%; border:3px solid #fff; padding:0;
+    background:var(--red); color:#fff; font-size:19px; font-weight:bold; line-height:1;
+    box-shadow:0 3px 0 rgba(0,0,0,.3); cursor:pointer; font-family:inherit;
+  }
+  #stickerDetailCloseBtn:active{ box-shadow:0 1px 0 rgba(0,0,0,.3); transform:translateY(2px); }
 
   /* ================= GAME 3: CAR SHAPE MATCHING ================= */
   #carDifficultySelect{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(10px,2.6vh,18px); padding:10px; }
@@ -449,6 +501,138 @@
   .shatter-wrap{ position:absolute; inset:0; z-index:40; }
   .shatter-piece{ position:absolute; inset:0; width:100%; height:100%; }
   .shatter-piece img{ width:100%; height:100%; object-fit:contain; display:block; }
+
+  /* ================= GAME 5: めいろ (maze) ================= */
+  #screen-maze{
+    background-image:url('images/maze_bg.png'); background-size:cover; background-position:center;
+  }
+  .maze-body{
+    flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:clamp(8px,1.8vh,14px); min-height:0; padding:6px;
+  }
+  #mazeBoardWrap{
+    position:relative; width:min(84vw,360px); aspect-ratio:1/1;
+  }
+  #mazeBoard{
+    position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr));
+    gap:clamp(3px,1vw,6px); border-radius:18px; background:rgba(255,255,255,.5); padding:clamp(4px,1.2vw,8px);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.12), 0 6px 16px rgba(0,0,0,.18);
+  }
+  .maze-cell{
+    position:relative; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:clamp(18px,5.6vw,26px); background-size:cover; background-position:center; overflow:hidden;
+  }
+  .maze-cell.empty{ background-image:url('images/maze_grass_tile.png'); }
+  .maze-cell.path{ background-image:url('images/maze_road_tile.png'); box-shadow:inset 0 0 0 2px rgba(255,255,255,.5); }
+  .maze-connector{ position:absolute; background-image:url('images/maze_road_tile.png'); background-size:cover; z-index:1; }
+  .maze-fence{
+    position:absolute; z-index:4; border-radius:3px;
+    background:repeating-linear-gradient(135deg,#ff8a1f 0,#ff8a1f 6px,#fff 6px,#fff 12px);
+    box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 0 0 1px rgba(0,0,0,.3);
+  }
+  .maze-fence.v{ width:6px; }
+  .maze-fence.h{ height:6px; }
+  .maze-cell.goal, .maze-cell.start{ overflow:visible; z-index:5; }
+  .maze-cell.goal{ box-shadow:inset 0 0 0 4px var(--red); animation:mazePopGlow 1s ease-in-out infinite; --glow-color:192,57,43; }
+  .maze-cell.start{ box-shadow:inset 0 0 0 4px #2e9e4f; animation:mazePopGlow 1s ease-in-out infinite; --glow-color:46,158,79; }
+  @keyframes mazePopGlow{
+    0%,100%{ box-shadow:inset 0 0 0 4px rgba(var(--glow-color),1), 0 0 0 rgba(var(--glow-color),0); }
+    50%{ box-shadow:inset 0 0 0 5px rgba(var(--glow-color),1), 0 0 22px 4px rgba(var(--glow-color),.85); }
+  }
+  .maze-cell-label{
+    position:absolute; top:-11px; left:50%; transform:translateX(-50%); z-index:6;
+    font-size:clamp(9px,2.6vw,12px); font-weight:900; color:#fff; -webkit-text-stroke:2px rgba(0,0,0,.35);
+    white-space:nowrap; line-height:1.4;
+  }
+  .maze-cell.goal .maze-cell-label{ color:#ffe28a; }
+  .maze-cell.start .maze-cell-label{ color:#baffc9; }
+  .maze-cell img.maze-cell-icon{ width:88%; height:88%; object-fit:contain; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
+  .maze-cell.goal img.maze-cell-icon, .maze-cell.start img.maze-cell-icon{
+    width:132%; height:132%; animation:mazePopBounce 1s ease-in-out infinite;
+  }
+  @keyframes mazePopBounce{
+    0%,100%{ transform:translateY(0) scale(1); }
+    50%{ transform:translateY(-6%) scale(1.06); }
+  }
+  .maze-effect{
+    position:absolute; width:25%; height:25%; z-index:30; pointer-events:none;
+    display:flex; align-items:center; justify-content:center; font-size:clamp(28px,9vw,42px);
+  }
+  .maze-effect.barricade{ animation:mazeEffectCrash .6s ease-out forwards; }
+  @keyframes mazeEffectCrash{
+    0%{ transform:scale(.3) rotate(0deg); opacity:0; }
+    30%{ transform:scale(1.3) rotate(-12deg); opacity:1; }
+    60%{ transform:scale(1.05) rotate(8deg); opacity:1; }
+    100%{ transform:scale(1.1) rotate(0deg); opacity:0; }
+  }
+  .maze-effect.puddle{ animation:mazeEffectSplash .7s ease-out forwards; }
+  @keyframes mazeEffectSplash{
+    0%{ transform:scale(.2) translateY(0); opacity:0; }
+    35%{ transform:scale(1.25) translateY(-10px); opacity:1; }
+    70%{ transform:scale(1) translateY(2px); opacity:1; }
+    100%{ transform:scale(1.05) translateY(6px); opacity:0; }
+  }
+  #mazeCar{
+    position:absolute; width:25%; height:25%; display:flex; align-items:center; justify-content:center;
+    z-index:20; pointer-events:none;
+    transition:left .32s cubic-bezier(.34,1.2,.64,1), top .32s cubic-bezier(.34,1.2,.64,1);
+  }
+  #mazeCar img{ width:82%; height:82%; object-fit:contain; filter:drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+  #mazeCar.bump{ animation:mazeBump .3s ease; }
+  @keyframes mazeBump{
+    0%,100%{ transform:translate(0,0); }
+    30%{ transform:translate(var(--bx,6px),var(--by,0)); }
+    60%{ transform:translate(calc(var(--bx,6px) * -0.6),calc(var(--by,0) * -0.6)); }
+  }
+  #mazeCar.win{ animation:mazeWin .7s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes mazeWin{
+    0%{ transform:scale(1) rotate(0deg); }
+    30%{ transform:scale(1.35) rotate(-10deg); }
+    55%{ transform:scale(.95) rotate(8deg); }
+    75%{ transform:scale(1.15) rotate(-4deg); }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  #mazeControls{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .maze-dpad{ display:grid; grid-template-columns:56px 56px 56px; grid-template-rows:56px 56px 56px; gap:6px; justify-content:center; }
+  .maze-btn{
+    border:none; border-radius:16px; font-family:inherit; font-weight:900; color:#fff; font-size:22px;
+    background:linear-gradient(180deg,#6fb3ff,#2c6fce); box-shadow:0 5px 0 #1d4f9c; cursor:pointer;
+  }
+  .maze-btn:active{ box-shadow:0 1px 0 #1d4f9c; transform:translateY(4px); }
+  .maze-btn:disabled{ opacity:.4; box-shadow:0 5px 0 #1d4f9c; }
+  #mazeUpBtn{ grid-column:2; grid-row:1; }
+  #mazeLeftBtn{ grid-column:1; grid-row:2; }
+  #mazeRightBtn{ grid-column:3; grid-row:2; }
+  #mazeDownBtn{ grid-column:2; grid-row:3; }
+  .maze-sub-row{ display:flex; gap:10px; }
+  .maze-btn-sub{
+    background:linear-gradient(180deg,var(--mustard),#a9711c); box-shadow:0 5px 0 #8a5810;
+    font-size:clamp(12px,3.2vw,15px); padding:8px 16px; border-radius:20px; white-space:nowrap;
+  }
+  .maze-btn-sub:active{ box-shadow:0 1px 0 #8a5810; transform:translateY(4px); }
+  .maze-btn-sub.hint-glow{ animation:mazeHintGlow .5s ease-in-out 3; }
+  @keyframes mazeHintGlow{
+    0%,100%{ filter:brightness(1); }
+    50%{ filter:brightness(1.5); }
+  }
+  .maze-btn.hint-glow{ animation:mazeHintGlow .5s ease-in-out 3; }
+  #mazeWinPanel{
+    flex:0 0 auto; display:none; flex-direction:column; align-items:center; gap:8px;
+  }
+  #mazeWinPanel.show{ display:flex; }
+  #mazeNextBtn{
+    padding:10px 34px; font-size:clamp(15px,4vw,20px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,#6fd08a,#1f9e4f); border:none; border-radius:30px;
+    box-shadow:0 6px 0 #157238; font-family:inherit;
+  }
+  #mazeNextBtn:active{ box-shadow:0 2px 0 #157238; transform:translateY(4px); }
+  #mazeNextBtn[hidden]{ display:none; }
+  #mazeReplayBtn{
+    padding:8px 26px; font-size:clamp(13px,3.4vw,17px); font-weight:bold; color:#fff;
+    background:linear-gradient(180deg,var(--mustard),#a9711c); border:none; border-radius:26px;
+    box-shadow:0 5px 0 #8a5810; font-family:inherit;
+  }
+  #mazeReplayBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(3px); }
 </style>
 </head>
 <body>
@@ -456,12 +640,29 @@
 
   <!-- ================= MENU ================= -->
   <div id="screen-menu" class="screen active">
-    <div id="menu-title">モンスターの<br>ごはんタイム</div>
-    <button class="menu-btn" id="btn-count"><span class="emoji">🍜</span>あぶらそばを かぞえよう！</button>
-    <button class="menu-btn" id="btn-car"><span class="emoji">🚗</span>くるまの かたちあわせ</button>
-    <button class="menu-btn" id="btn-guruguru"><span class="emoji">🌀</span>ぐるぐるクイズ</button>
-    <button class="menu-btn" id="btn-seal"><span class="emoji">📔</span>シールちょう</button>
-    <div id="app-version">v1.1.0</div>
+    <div id="menu-title-wrap">
+      <img id="menu-title-img" src="assets/images/title.png" alt="くるまの えあわせタウン">
+    </div>
+    <div id="home-cards">
+      <button class="home-card" id="btn-count">
+        <span class="home-card-badge">🍜</span>
+        <span class="home-card-label">あぶらそばを<br>かぞえよう！</span>
+      </button>
+      <button class="home-card home-card-image" id="btn-car">
+        <img class="home-card-img" src="assets/images/btn_car.png" alt="くるまの かたちあわせ">
+      </button>
+      <button class="home-card home-card-image" id="btn-guruguru">
+        <img class="home-card-img" src="assets/images/btn_guruguru.png" alt="ぐるぐる クイズ">
+      </button>
+      <button class="home-card" id="btn-maze">
+        <span class="home-card-badge">🚒</span>
+        <span class="home-card-label">めいろで<br>すすもう！</span>
+      </button>
+      <button class="home-card home-card-image" id="btn-seal">
+        <img class="home-card-img" src="assets/images/btn_seal.png" alt="シール ちょう">
+      </button>
+    </div>
+    <div id="app-version">v2.0.0</div>
   </div>
 
   <!-- ================= GAME 1: COUNTING ================= -->
@@ -494,10 +695,6 @@
   <div id="screen-seal" class="screen">
     <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div></div></div>
     <div id="title">シールちょう</div>
-    <div class="seal-bg-buttons">
-      <button class="seal-bg-btn" data-bg="boy"><img src="images/bg_seal_boy.png" alt="おとこのこ">おとこのこ</button>
-      <button class="seal-bg-btn" data-bg="girl"><img src="images/bg_seal_girl.png" alt="おんなのこ">おんなのこ</button>
-    </div>
     <div id="seal-board-wrap">
       <div id="seal-board"></div>
     </div>
@@ -561,6 +758,35 @@
     </div>
   </div>
 
+  <!-- ================= GAME 5: めいろ ================= -->
+  <div id="screen-maze" class="screen">
+    <div class="topbar"><button class="small-btn btn-back" data-nav="menu">◀ もどる</button><div class="sticker-progress" id="mazeStageBadge">ステージ 1 / 3</div></div>
+    <div id="title">ゴールまで いこう！</div>
+    <div class="maze-body">
+      <div class="speech-bubble" id="mazeBubble">やじるしで すすもう！</div>
+      <div id="mazeBoardWrap">
+        <div id="mazeBoard"></div>
+        <div id="mazeCar"><img src="images/maze_car.png" alt="くるま"></div>
+      </div>
+      <div id="mazeControls">
+        <div class="maze-dpad">
+          <button class="maze-btn" id="mazeUpBtn" aria-label="すすむ">▲</button>
+          <button class="maze-btn" id="mazeLeftBtn" aria-label="ひだりへ">◀</button>
+          <button class="maze-btn" id="mazeRightBtn" aria-label="みぎへ">▶</button>
+          <button class="maze-btn" id="mazeDownBtn" aria-label="したへ">▼</button>
+        </div>
+        <div class="maze-sub-row">
+          <button class="maze-btn-sub" id="mazeUndoBtn">↩ もどる</button>
+          <button class="maze-btn-sub" id="mazeHintBtn">💡 ヒント</button>
+        </div>
+      </div>
+      <div id="mazeWinPanel">
+        <button id="mazeNextBtn">つぎの ステージへ ▶</button>
+        <button id="mazeReplayBtn">もういちど あそぶ🎉</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 <div id="stars-layer"></div>
 <div id="popup-layer"></div>
@@ -573,6 +799,16 @@
   <div class="sticker-reveal-phrase" id="stickerRevealPhrase"></div>
   <button id="stickerRevealCloseBtn">とじる</button>
 </div>
+<div id="stickerDetailView">
+  <div class="sticker-popup-card">
+    <button id="stickerDetailCloseBtn" aria-label="とじる">×</button>
+    <div class="sticker-card sticker-card-big">
+      <img id="stickerDetailImg" src="" alt="シール">
+    </div>
+    <div class="sticker-reveal-name" id="stickerDetailName"></div>
+    <div class="sticker-reveal-phrase" id="stickerDetailPhrase"></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -584,58 +820,71 @@
     img.addEventListener('error', function(){ imgFallback(img); });
   });
 
-  /* ===================== sticker character data (Bikkuriman-style angel/devil pairs) ===================== */
+  /* ===================== disable native image drag/right-click menu =====================
+     On desktop browsers, holding the mouse down on an <img> and moving it starts the
+     browser's own native drag-and-drop (ghost image) gesture, which swallows the
+     pointermove events our custom drag logic relies on - left-click "doesn't work" as a
+     result, while right-click (which never triggers native image drag) does, but then
+     pops the context menu instead. Disabling both makes left-click dragging work normally. */
+  document.addEventListener('dragstart', function(e){
+    if(e.target && e.target.tagName === 'IMG'){ e.preventDefault(); }
+  });
+  document.addEventListener('contextmenu', function(e){
+    if(e.target && e.target.tagName === 'IMG'){ e.preventDefault(); }
+  });
+
+  /* ===================== sticker character data (Pokemon-style 3-stage evolution lines) ===================== */
   var STICKERS = [
-    {name:'ほのおエンジェル', phrase:'あつあつハートで ぽかぽかに するよ！'},
-    {name:'ほのおデビル', phrase:'いたずらファイヤーで おしりを あぶっちゃうぞ！'},
-    {name:'こおりエンジェル', phrase:'つめたい てを ぎゅっと あたためるよ！'},
-    {name:'こおりデビル', phrase:'ぷるぷる こおらせ いたずらするぞ！'},
-    {name:'かみなりエンジェル', phrase:'ぴかっと ひかって げんきを あげる！'},
-    {name:'かみなりデビル', phrase:'ビリビリ いたずらで びっくりさせるぞ！'},
-    {name:'かぜエンジェル', phrase:'そよそよ かぜで きもちよく してあげる！'},
-    {name:'かぜデビル', phrase:'ぴゅーっと ふきとばす いたずらずき！'},
-    {name:'だいちエンジェル', phrase:'ふかふか つちで みんなを まもるよ！'},
-    {name:'だいちデビル', phrase:'どろんこ まみれに しちゃうぞ！'},
-    {name:'しずくエンジェル', phrase:'つるつる しずくで きれいに あらうよ！'},
-    {name:'しずくデビル', phrase:'びしょぬれ いたずら だいすき！'},
-    {name:'ひかりエンジェル', phrase:'まぶしい ひかりで あんしんを とどけるよ！'},
-    {name:'ひかりデビル', phrase:'ピカピカ めがくらむ いたずらこうせん！'},
-    {name:'やみエンジェル', phrase:'よるの おともだち やさしく みまもるよ！'},
-    {name:'やみデビル', phrase:'まっくらやみで おばけの まねっこ！'},
-    {name:'ほしエンジェル', phrase:'きらきら ほしぞらで ゆめを みせるよ！'},
-    {name:'ほしデビル', phrase:'りゅうせい いたずらで どっきり！'},
-    {name:'つきエンジェル', phrase:'しずかな よるに おやすみうたを うたうよ'},
-    {name:'つきデビル', phrase:'まんげつの よるに いたずら たいかい！'},
-    {name:'たいようエンジェル', phrase:'あさひの ひかりで げんきに おこすよ！'},
-    {name:'たいようデビル', phrase:'あつーい ひざしで あせだくに するぞ！'},
-    {name:'はなエンジェル', phrase:'いいにおいの はなたばを プレゼント！'},
-    {name:'はなデビル', phrase:'くしゃみが とまらない はなふん いたずら！'},
-    {name:'もりエンジェル', phrase:'みどりの もりで しんこきゅう しようね'},
-    {name:'もりデビル', phrase:'かくれんぼ とくいな いたずらもりびと！'},
-    {name:'うみエンジェル', phrase:'あおい うみで いっしょに およごうね！'},
-    {name:'うみデビル', phrase:'おおなみざぶーん いたずらは とくい！'},
-    {name:'やまエンジェル', phrase:'たかい やまから みんなを おうえん！'},
-    {name:'やまデビル', phrase:'やまびこで まねっこ いたずらするぞ！'},
-    {name:'くもエンジェル', phrase:'ふわふわ くものうえで おひるねしよう'},
-    {name:'くもデビル', phrase:'きゅうな あめで びしょぬれ いたずら！'},
-    {name:'にじエンジェル', phrase:'あめのあと にじをかけて みんなをえがおに'},
-    {name:'にじデビル', phrase:'にじいろ いたずらペイントで まっしろに！'},
-    {name:'すなエンジェル', phrase:'さらさら すなで おしろを つくろうね'},
-    {name:'すなデビル', phrase:'すなあらしで めが あけられない いたずら！'},
-    {name:'おとエンジェル', phrase:'たのしい うたごえで みんなを げんきに！'},
-    {name:'おとデビル', phrase:'おおきな おとで びっくり いたずら！'},
-    {name:'ゆめエンジェル', phrase:'たのしい ゆめを みせて あげるよ'},
-    {name:'ゆめデビル', phrase:'こわいゆめで どきどき いたずら！'},
-    {name:'かがみエンジェル', phrase:'きらきら かがみで えがおを うつすよ'},
-    {name:'かがみデビル', phrase:'へんなかおに うつす いたずらかがみ！'},
-    {name:'ほうせきエンジェル', phrase:'きらめく たからもので みんなを しあわせに'},
-    {name:'ほうせきデビル', phrase:'にせもの たからばこで だまし いたずら！'},
-    {name:'ひょうがエンジェル', phrase:'つめたい かぜで ひやして あげるよ'},
-    {name:'ひょうがデビル', phrase:'つるつる こおりで すべって いたずら！'},
-    {name:'いなずまエンジェル', phrase:'はやわざで こまったときに かけつけるよ'},
-    {name:'いなずまデビル', phrase:'びゅーんと はやい いたずら にげあし！'},
-    {name:'あらしエンジェル', phrase:'あらしの あとには きっと はれるよ'},
-    {name:'あらしデビル', phrase:'ぐるぐる たつまきで まきあげ いたずら！'}
+    {name:'ひのたまニャン', phrase:'あったかい しっぽで てを ぽかぽかに するよ！'},
+    {name:'メラメラキャット', phrase:'ほのおの ジャンプで みんなを げんきに するよ！'},
+    {name:'えんじんライオン', phrase:'ごうごう もえる たてがみで まもるよ！'},
+    {name:'ぷちがめ', phrase:'こうらから みずでっぽう ぴゅっと だすよ！'},
+    {name:'あわぶくガメ', phrase:'あわで みんなを つつんで きれいに あらうよ！'},
+    {name:'だいかいりゅう', phrase:'おおきな なみで まちを まもるぞ！'},
+    {name:'たねっこ', phrase:'ちいさな はっぱで ひなたぼっこ するよ！'},
+    {name:'つるつるリーフ', phrase:'つるを のばして たかいところまで とどくよ！'},
+    {name:'だいじゅぼく', phrase:'おおきな きで みんなに かげを つくるよ！'},
+    {name:'ぴよビリー', phrase:'ちいさな かみなりで キラッと ひかるよ！'},
+    {name:'サンダーチック', phrase:'バチバチ でんきで げんきを わけてあげる！'},
+    {name:'らいめいおう', phrase:'おおきな かみなりで そらを かがやかせるぞ！'},
+    {name:'ころころストーン', phrase:'まんまるボディで ころころ ころがるよ！'},
+    {name:'がんせきロール', phrase:'かたい こうらで ドスンと たいあたり！'},
+    {name:'だいがんせきキング', phrase:'おおきな いわの ちからで どっしり まもるぞ！'},
+    {name:'ひなたか', phrase:'ちいさな つばさで ぴょんと とびはねるよ！'},
+    {name:'はやぶさウィング', phrase:'びゅーんと そらを かけぬけるよ！'},
+    {name:'おおぞらおう', phrase:'おおきな つばさで そらを まもるぞ！'},
+    {name:'ぷちペンギン', phrase:'つるつる こおりで すべって あそぶよ！'},
+    {name:'フロストペンギン', phrase:'ひんやり かぜで あついひを すずしく するよ！'},
+    {name:'だいひょうがキング', phrase:'おおきな こおりの ちからで みんなを ひやすぞ！'},
+    {name:'ぽこもぐ', phrase:'じめんを ほって トンネル つくるよ！'},
+    {name:'ドリルモグラ', phrase:'ぐいぐい じめんを ほりすすむよ！'},
+    {name:'だいちのおうじゃ', phrase:'おおきな ちからで だいちを ゆらすぞ！'},
+    {name:'もぞもぞむし', phrase:'はっぱの うえを もぞもぞ あるくよ！'},
+    {name:'マユコクーン', phrase:'まゆの なかで へんしんの じゅんび だよ！'},
+    {name:'ぎんいろちょうおう', phrase:'きらきら はねで そらを まいあがるぞ！'},
+    {name:'ぴょんうさ', phrase:'ぴょんぴょん はねて みんなを えがおに するよ！'},
+    {name:'きらきらラビット', phrase:'キラキラ ひかりで よるみちを てらすよ！'},
+    {name:'せいれいうさぎおう', phrase:'やさしい ひかりで みんなを まもるぞ！'},
+    {name:'こぎつね', phrase:'しっぽを ふりふり こっそり あそぶよ！'},
+    {name:'よいやみギツネ', phrase:'くらやみでも しっぽの ひかりで あんしんだよ！'},
+    {name:'くろやみせんおう', phrase:'よるの まちを こっそり まもってあげるぞ！'},
+    {name:'ちびとかげ', phrase:'ちいさな しっぽを ゆらゆら ふるよ！'},
+    {name:'はりゅうドラゴ', phrase:'ちいさな つばさで ふわっと とぶよ！'},
+    {name:'こうりゅうおう', phrase:'おおきな つばさと ほのおで そらを まうぞ！'},
+    {name:'つんつんはり', phrase:'ちいさな はりで つんつん さわるよ！'},
+    {name:'はがねハリネズミ', phrase:'ぴかぴか はりで キラッと ひかるよ！'},
+    {name:'こうてつおうじゃ', phrase:'かたい はがねの からだで みんなを まもるぞ！'},
+    {name:'ふわふくろう', phrase:'まんまるめで ふしぎな ゆめを みせるよ！'},
+    {name:'テレパフクロウ', phrase:'こころの こえを きいて おてつだいするよ！'},
+    {name:'だいけんじゃおう', phrase:'ふしぎな ちからで みんなを みちびくぞ！'},
+    {name:'ぷにけろ', phrase:'ぷにぷに ほっぺで ケロケロ なくよ！'},
+    {name:'ぶくぶくケロン', phrase:'あわあわ バブルで みずたまり あそびだよ！'},
+    {name:'あわあわキングケロ', phrase:'おおきな あわで みんなを ふわふわ うかせるぞ！'},
+    {name:'ふわりす', phrase:'ふわふわ しっぽで かぜに のるよ！'},
+    {name:'そよかぜリス', phrase:'どんぐりを もって かぜと いっしょに はしるよ！'},
+    {name:'だいふうしんおう', phrase:'おおきな かぜで みんなを すずしく するぞ！'},
+    {name:'ほしいぬ', phrase:'きらきら ほしぞらの したで ねむるよ！'},
+    {name:'せいざおおかみ', phrase:'ほしの ちからで よるぞらを かがやかせるぞ！'}
   ];
 
   /* ===================== localStorage state ===================== */
@@ -646,7 +895,7 @@
   var CORRECT_PER_STICKER = 5;
 
   function loadState(){
-    var defaults = { stickers:[], nextSticker:1, sealBg:'boy', correctStreak:0 };
+    var defaults = { stickers:[], nextSticker:1, correctStreak:0 };
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(raw){
@@ -702,11 +951,22 @@
     if(name === 'seal'){ renderSealBoard(); }
     if(name === 'car'){ window.resetCarGame(); }
     if(name === 'guruguru'){ window.resetGuruguruGame(); }
+    if(name === 'maze'){ window.resetMazeGame(); }
   }
-  document.getElementById('btn-count').addEventListener('pointerdown', function(){ showScreen('count'); });
-  document.getElementById('btn-seal').addEventListener('pointerdown', function(){ showScreen('seal'); });
-  document.getElementById('btn-car').addEventListener('pointerdown', function(){ showScreen('car'); });
-  document.getElementById('btn-guruguru').addEventListener('pointerdown', function(){ showScreen('guruguru'); });
+  function bounceThenNavigate(btn, screenName){
+    btn.addEventListener('pointerdown', function(e){
+      ensureAudio();
+      btn.classList.remove('bounce');
+      void btn.offsetWidth; // restart the animation if it's still mid-play from a rapid double-tap
+      btn.classList.add('bounce');
+      setTimeout(function(){ showScreen(screenName); }, 190);
+    });
+  }
+  bounceThenNavigate(document.getElementById('btn-count'), 'count');
+  bounceThenNavigate(document.getElementById('btn-seal'), 'seal');
+  bounceThenNavigate(document.getElementById('btn-car'), 'car');
+  bounceThenNavigate(document.getElementById('btn-guruguru'), 'guruguru');
+  bounceThenNavigate(document.getElementById('btn-maze'), 'maze');
   document.querySelectorAll('[data-nav="menu"]').forEach(function(b){
     b.addEventListener('pointerdown', function(e){ e.stopPropagation(); showScreen('menu'); });
   });
@@ -870,6 +1130,7 @@
     var img = document.getElementById('stickerRevealImg');
     var num2 = ('0'+num).slice(-2);
     var info = STICKERS[num-1] || {name:'シール'+num2, phrase:''};
+    img.classList.remove('img-missing'); // clear any stale broken-image state from the initial empty src
     img.src = 'images/seal_'+num2+'.png';
     img.alt = info.name;
     img.onerror = function(){ imgFallback(img); };
@@ -1223,23 +1484,34 @@
      =================================================================== */
   (function(){
     var sealBoard = document.getElementById('seal-board');
-    var bgButtons = document.querySelectorAll('.seal-bg-btn');
+    sealBoard.style.backgroundImage = "url('images/bg_seal_boy.png')";
 
-    bgButtons.forEach(function(btn){
-      btn.addEventListener('pointerdown', function(e){
-        e.stopPropagation();
-        state.sealBg = btn.dataset.bg;
-        saveState();
-        renderSealBoard();
-      });
+    var detailView = document.getElementById('stickerDetailView');
+    var detailImg = document.getElementById('stickerDetailImg');
+    var detailName = document.getElementById('stickerDetailName');
+    var detailPhrase = document.getElementById('stickerDetailPhrase');
+
+    function openStickerDetail(num){
+      var num2 = ('0'+num).slice(-2);
+      var info = STICKERS[num-1] || {name:'シール'+num2, phrase:''};
+      detailImg.classList.remove('img-missing'); // clear any stale broken-image state from the initial empty src
+      detailImg.src = 'images/seal_'+num2+'.png';
+      detailImg.alt = info.name;
+      detailImg.onerror = function(){ imgFallback(detailImg); };
+      detailName.textContent = info.name;
+      detailPhrase.textContent = info.phrase;
+      detailView.classList.add('show');
+    }
+    function closeStickerDetail(){ detailView.classList.remove('show'); }
+    document.getElementById('stickerDetailCloseBtn').addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      closeStickerDetail();
+    });
+    detailView.addEventListener('pointerdown', function(e){
+      if(e.target === detailView){ closeStickerDetail(); } // tap the side/backdrop to close
     });
 
     window.renderSealBoard = function(){
-      if(state.sealBg !== 'boy' && state.sealBg !== 'girl'){ state.sealBg = 'boy'; }
-      sealBoard.style.backgroundImage = "url('images/bg_seal_"+state.sealBg+".png')";
-      bgButtons.forEach(function(btn){
-        btn.classList.toggle('selected', btn.dataset.bg === state.sealBg);
-      });
       sealBoard.innerHTML = '';
       for(var i=1;i<=TOTAL_STICKERS;i++){
         var unlocked = state.stickers.indexOf(i) !== -1;
@@ -1255,6 +1527,12 @@
           card.className = 'sticker-card';
           card.appendChild(img);
           cell.appendChild(card);
+          (function(n){
+            cell.addEventListener('pointerdown', function(e){
+              e.stopPropagation();
+              openStickerDetail(n);
+            });
+          })(i);
         } else {
           cell.appendChild(img);
         }
@@ -1592,10 +1870,11 @@
       }
     }
 
-    function applyPieceTransform(piece, extraX, extraY, rotOverride){
+    function applyPieceTransform(piece, extraX, extraY, rotOverride, scaleOverride){
       var x = piece.restX + (extraX||0), y = piece.restY + (extraY||0);
       var rot = (rotOverride != null) ? rotOverride : piece.restRot;
-      piece.el.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg)';
+      var sc = (scaleOverride != null) ? scaleOverride : (piece.restScale != null ? piece.restScale : 1);
+      piece.el.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg) scale('+sc+')';
     }
 
     function buildPuzzlePieces(car){
@@ -1611,21 +1890,49 @@
         inner.appendChild(makeImg('images/'+car.id+'.png', '', null));
         el.appendChild(inner);
         puzzleStage.appendChild(el);
-        var piece = { el:el, restX:0, restY:0, restRot:0, placed:false };
+        var piece = { el:el, restX:0, restY:0, restRot:0, restScale:1, placed:false };
         pieces.push(piece);
         attachPuzzleDrag(piece);
         applyPieceTransform(piece);
       }
     }
 
+    function reflectClamp(v, max){
+      // "bounces" a value back inside [-max,max] like a ball off a wall, instead of
+      // pinning it to the exact boundary - keeps distinct pieces from ever landing on
+      // the exact same clamped spot, and reads as a real bounce rather than a hard stop
+      if(max <= 0) return 0;
+      var sign = v < 0 ? -1 : 1;
+      var av = Math.abs(v) % (max*2);
+      if(av > max) av = max*2 - av;
+      return sign*av;
+    }
+
+    var SCATTER_SCALE = 0.55; // shrink pieces while scattered so they can spread out widely and still stay fully on-screen
+
     function scatterPieces(){
+      // A piece element is the full stage size (only a wedge shows), so its visible
+      // pixels reach from the stage center out to roughly half the stage size, times
+      // the scatter scale. Bound each piece's travel so those visible pixels never
+      // cross the screen edge, and bounce (not pin) overshoot so pieces don't pile up.
+      var stageRect = puzzleStage.getBoundingClientRect();
+      var stageCenterX = stageRect.left + stageRect.width/2;
+      var stageCenterY = stageRect.top + stageRect.height/2;
+      var margin = 12;
+      var reachX = (stageRect.width/2) * SCATTER_SCALE;
+      var reachY = (stageRect.height/2) * SCATTER_SCALE;
+      var maxX = Math.max(0, Math.min(stageCenterX, window.innerWidth - stageCenterX) - reachX - margin);
+      var maxY = Math.max(0, Math.min(stageCenterY, window.innerHeight - stageCenterY) - reachY - margin);
       pieces.forEach(function(piece){
         var angle = Math.random()*Math.PI*2;
-        var dist = 90 + Math.random()*90;
-        piece.restX = Math.cos(angle)*dist;
-        piece.restY = Math.sin(angle)*dist + 30;
+        var dist = 170 + Math.random()*170; // pushed well clear of the stage, not just the edge of the hole
+        var x = reflectClamp(Math.cos(angle)*dist, maxX);
+        var y = reflectClamp(Math.sin(angle)*dist, maxY);
+        piece.restX = x;
+        piece.restY = y;
         piece.restRot = Math.random()*140-70;
-        piece.el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)';
+        piece.restScale = SCATTER_SCALE;
+        piece.el.style.transition = 'transform .55s cubic-bezier(.34,2.1,.64,1)';
         applyPieceTransform(piece);
       });
     }
@@ -1642,14 +1949,14 @@
         el.style.zIndex = ++zTop; // always bring the grabbed piece to the very top, above any other piece
         try{ el.setPointerCapture(e.pointerId); }catch(err){}
         startX = e.clientX; startY = e.clientY;
-        // straighten the piece the moment it's grabbed, so its shape is easy to read while dragging
+        // straighten AND restore full size the moment it's grabbed, so the shape is easy to read while dragging
         el.style.transition = 'transform .18s ease';
-        applyPieceTransform(piece, 0, 0, 0);
+        applyPieceTransform(piece, 0, 0, 0, 1);
         setTimeout(function(){ if(dragging) el.style.transition = 'none'; }, 180);
       });
       el.addEventListener('pointermove', function(e){
         if(!dragging) return;
-        applyPieceTransform(piece, e.clientX-startX, e.clientY-startY, 0);
+        applyPieceTransform(piece, e.clientX-startX, e.clientY-startY, 0, 1);
       });
       function endDrag(e){
         if(!dragging) return;
@@ -1660,7 +1967,7 @@
         var dist = Math.sqrt(finalX*finalX + finalY*finalY);
         el.style.transition = 'transform .35s cubic-bezier(.34,1.56,.64,1)';
         if(dist <= SNAP_RADIUS){
-          piece.restX = 0; piece.restY = 0; piece.restRot = 0;
+          piece.restX = 0; piece.restY = 0; piece.restRot = 0; piece.restScale = 1;
           piece.placed = true;
           el.classList.add('placed');
           el.style.zIndex = '1'; // sink below any still-loose pieces so they stay grabbable
@@ -1668,8 +1975,8 @@
           playCatchSound(1);
           checkPuzzleSolved();
         } else {
-          // stay right where it was released instead of snapping back
-          piece.restX = finalX; piece.restY = finalY; piece.restRot = 0;
+          // stay right where it was released (full size, since the user placed it there)
+          piece.restX = finalX; piece.restY = finalY; piece.restRot = 0; piece.restScale = 1;
           applyPieceTransform(piece);
         }
       }
@@ -1969,6 +2276,443 @@
       window.speechSynthesis && window.speechSynthesis.cancel();
       document.querySelectorAll('#guruguruStage .shatter-wrap').forEach(function(w){ w.remove(); });
     };
+  })();
+
+  /* ===================== GAME 5: めいろ (grid maze) ===================== */
+  (function(){
+    var START = [3,0], GOAL = [0,3]; // overwritten each generateMaze() call by pickStartGoal()
+    // Difficulty tiers - each regenerates a fresh random maze (see generateMaze).
+    // "branches" are plain dead-end road forks (no obstacle, just a wrong turn
+    // you back out of with もどる) - more of them means less bare grass and
+    // more decisions at each junction.
+    var DIFFICULTIES = [
+      { label:'しょきゅう', traps:1, branches:2 },
+      { label:'ちゅうきゅう', traps:2, branches:2 },
+      { label:'じょうきゅう', traps:3, branches:2 }
+    ];
+    var TOTAL_STAGES = DIFFICULTIES.length;
+    var OBSTACLE_TYPES = ['barricade','puddle'];
+    var OBSTACLE_ICON = { barricade:'images/maze_obstacle_barricade.png', puddle:'images/maze_obstacle_puddle.png' };
+    var OBSTACLE_EFFECT_EMOJI = { barricade:'💥', puddle:'💦' };
+
+    var boardEl = document.getElementById('mazeBoard');
+    var boardWrapEl = document.getElementById('mazeBoardWrap');
+    var carEl = document.getElementById('mazeCar');
+    var bubbleEl = document.getElementById('mazeBubble');
+    var stageBadgeEl = document.getElementById('mazeStageBadge');
+    var winPanelEl = document.getElementById('mazeWinPanel');
+    var upBtn = document.getElementById('mazeUpBtn');
+    var leftBtn = document.getElementById('mazeLeftBtn');
+    var rightBtn = document.getElementById('mazeRightBtn');
+    var downBtn = document.getElementById('mazeDownBtn');
+    var undoBtn = document.getElementById('mazeUndoBtn');
+    var hintBtn = document.getElementById('mazeHintBtn');
+    var nextBtn = document.getElementById('mazeNextBtn');
+    var replayBtn = document.getElementById('mazeReplayBtn');
+    var screenEl = document.getElementById('screen-maze');
+
+    var stageIndex = 0;
+    var pathSet = null;    // Set of "r,c" cells that make up the solvable route (incl. start/goal)
+    var edgeSet = null;    // Set of canonical "r,c|r,c" strings: legal moves between adjacent cells
+    var trapCells = null;  // {"r,c": "barricade"|"puddle"}
+    var pathEdgePairs = null; // [["r,c","r,c"], ...] consecutive solution-path links, for connector bridges
+    var goalImgEl = null;  // the <img> for the current goal cell, swapped to the "safe" building on win
+    var pos = null;        // {r,c}
+    var history = [];      // stack of previous {r,c}
+    var won = false;
+    var locked = false;    // true while a trap effect / reset animation is playing
+
+    function key(r,c){ return r+','+c; }
+    function edgeKey(a,b){ return a < b ? a+'|'+b : b+'|'+a; }
+    function inBounds(r,c){ return r>=0 && r<=3 && c>=0 && c<=3; }
+    function shuffle(arr){
+      for(var i=arr.length-1;i>0;i--){
+        var j = Math.floor(Math.random()*(i+1));
+        var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
+      }
+      return arr;
+    }
+    function gridNeighbors(r,c){
+      return shuffle([[r-1,c],[r+1,c],[r,c-1],[r,c+1]].filter(function(p){ return inBounds(p[0],p[1]); }));
+    }
+    function manhattan(a,b){ return Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]); }
+    // Start/goal move to a new random pair of cells each maze, as long as
+    // they're far enough apart to make for an interesting route.
+    function pickStartGoal(){
+      var s, g;
+      do{
+        s = [Math.floor(Math.random()*4), Math.floor(Math.random()*4)];
+        g = [Math.floor(Math.random()*4), Math.floor(Math.random()*4)];
+      } while(manhattan(s,g) < 4);
+      START = s; GOAL = g;
+    }
+
+    // Randomized backtracking walk from START to GOAL, producing one simple
+    // (non-branching) solution path - a fresh shape every time it's called.
+    function carvePath(){
+      var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
+      var visited = {}; visited[startKey] = true;
+      var trail = [startKey];
+      function dfs(curKey){
+        if(curKey === goalKey) return true;
+        var parts = curKey.split(','); var r = +parts[0], c = +parts[1];
+        var nbrs = gridNeighbors(r,c);
+        for(var i=0;i<nbrs.length;i++){
+          var nk = key(nbrs[i][0], nbrs[i][1]);
+          if(!visited[nk]){
+            visited[nk] = true;
+            trail.push(nk);
+            if(dfs(nk)) return true;
+            trail.pop();
+            visited[nk] = false; // un-mark: only cells on the *current* trail should block reuse
+          }
+        }
+        return false;
+      }
+      dfs(startKey);
+      return trail;
+    }
+
+    function generateMaze(){
+      pickStartGoal();
+      var trail = carvePath();
+      var solutionSet = {};
+      trail.forEach(function(k){ solutionSet[k] = true; });
+      var occupied = {};
+      trail.forEach(function(k){ occupied[k] = true; });
+      var edges = new Set();
+      var pairs = []; // walkable-to-walkable edges (main path + decoys), for drawing connector bridges
+      for(var i=0;i<trail.length-1;i++){
+        edges.add(edgeKey(trail[i], trail[i+1]));
+        pairs.push([trail[i], trail[i+1]]);
+      }
+
+      var traps = {};
+      var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
+      var trapWanted = DIFFICULTIES[stageIndex].traps;
+      var trapCandidates = shuffle(trail.filter(function(k){ return k !== startKey && k !== goalKey; }));
+      var trapsPlaced = 0;
+      for(var ci=0; ci<trapCandidates.length && trapsPlaced<trapWanted; ci++){
+        var parts = trapCandidates[ci].split(','); var r = +parts[0], c = +parts[1];
+        var nbrs = gridNeighbors(r,c);
+        for(var ni=0; ni<nbrs.length; ni++){
+          var nk = key(nbrs[ni][0], nbrs[ni][1]);
+          if(!occupied[nk]){
+            traps[nk] = OBSTACLE_TYPES[trapsPlaced % OBSTACLE_TYPES.length];
+            edges.add(edgeKey(trapCandidates[ci], nk));
+            occupied[nk] = true;
+            trapsPlaced++;
+            break;
+          }
+        }
+      }
+
+      // Plain dead-end road forks: look like more path, lead nowhere, no
+      // obstacle - just a wrong turn you back out of with もどる.
+      var branchWanted = DIFFICULTIES[stageIndex].branches;
+      var branchCandidates = shuffle(trail.slice());
+      var branchesPlaced = 0;
+      for(var bi=0; bi<branchCandidates.length && branchesPlaced<branchWanted; bi++){
+        var bparts = branchCandidates[bi].split(','); var br = +bparts[0], bc = +bparts[1];
+        var bnbrs = gridNeighbors(br,bc);
+        for(var bni=0; bni<bnbrs.length; bni++){
+          var bnk = key(bnbrs[bni][0], bnbrs[bni][1]);
+          if(!occupied[bnk]){
+            solutionSet[bnk] = true;
+            edges.add(edgeKey(branchCandidates[bi], bnk));
+            pairs.push([branchCandidates[bi], bnk]);
+            occupied[bnk] = true;
+            branchesPlaced++;
+            break;
+          }
+        }
+      }
+
+      pathSet = new Set(Object.keys(solutionSet));
+      edgeSet = edges;
+      trapCells = traps;
+      pathEdgePairs = pairs;
+    }
+
+    function buildBoard(){
+      boardEl.innerHTML = '';
+      var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
+      var cellEls = {};
+      for(var r=0;r<4;r++){
+        for(var c=0;c<4;c++){
+          var cell = document.createElement('div');
+          var k = key(r,c);
+          var looksLikeRoad = pathSet.has(k) || !!trapCells[k];
+          cell.className = 'maze-cell ' + (looksLikeRoad ? 'path' : 'empty');
+          if(k === startKey){
+            cell.classList.add('start');
+            var label1 = document.createElement('span');
+            label1.className = 'maze-cell-label'; label1.textContent = 'スタート';
+            cell.appendChild(label1);
+            var flag = document.createElement('img');
+            flag.className = 'maze-cell-icon';
+            flag.src = 'images/maze_start_station.png';
+            flag.alt = 'スタート（しょうぼうしょ）';
+            cell.appendChild(flag);
+          }
+          if(k === goalKey){
+            cell.classList.add('goal');
+            var label2 = document.createElement('span');
+            label2.className = 'maze-cell-label'; label2.textContent = 'ゴール';
+            cell.appendChild(label2);
+            goalImgEl = document.createElement('img');
+            goalImgEl.className = 'maze-cell-icon';
+            goalImgEl.src = 'images/maze_goal.png';
+            goalImgEl.alt = 'ゴール';
+            cell.appendChild(goalImgEl);
+          } else if(trapCells[k]){
+            var obsImg = document.createElement('img');
+            obsImg.className = 'maze-cell-icon';
+            obsImg.src = OBSTACLE_ICON[trapCells[k]] || '';
+            obsImg.alt = '';
+            cell.appendChild(obsImg);
+          }
+          boardEl.appendChild(cell);
+          cellEls[k] = cell;
+        }
+      }
+      // Bridge the gap between consecutive solution-path cells so the actual
+      // walkable route reads as one continuous ribbon - any road-tile cell
+      // NOT joined by a bridge is a true dead end, not just a missing texture.
+      var boardRect = boardEl.getBoundingClientRect();
+      pathEdgePairs.forEach(function(pair){
+        var elA = cellEls[pair[0]], elB = cellEls[pair[1]];
+        if(!elA || !elB) return;
+        var a = elA.getBoundingClientRect(), b = elB.getBoundingClientRect();
+        var left = Math.min(a.left, b.left) - boardRect.left;
+        var top = Math.min(a.top, b.top) - boardRect.top;
+        var right = Math.max(a.right, b.right) - boardRect.left;
+        var bottom = Math.max(a.bottom, b.bottom) - boardRect.top;
+        var bridge = document.createElement('div');
+        bridge.className = 'maze-connector';
+        bridge.style.left = left + 'px';
+        bridge.style.top = top + 'px';
+        bridge.style.width = (right-left) + 'px';
+        bridge.style.height = (bottom-top) + 'px';
+        boardEl.appendChild(bridge);
+      });
+      // Any two grid-adjacent "occupied-looking" cells (path or trap) that
+      // AREN'T bridged above have no legal move between them - mark that
+      // boundary with a little fence so it reads as blocked, not just empty.
+      for(var r2=0; r2<4; r2++){
+        for(var c2=0; c2<4; c2++){
+          var k2 = key(r2,c2);
+          var occupied2 = pathSet.has(k2) || trapCells[k2];
+          if(!occupied2) continue;
+          [[r2+1,c2],[r2,c2+1]].forEach(function(nb){
+            var nr = nb[0], nc = nb[1];
+            if(!inBounds(nr,nc)) return;
+            var nk = key(nr,nc);
+            var occupiedN = pathSet.has(nk) || trapCells[nk];
+            if(!occupiedN) return;
+            if(edgeSet.has(edgeKey(k2,nk))) return; // legal move - already bridged
+            var elA = cellEls[k2], elB = cellEls[nk];
+            if(!elA || !elB) return;
+            var ra = elA.getBoundingClientRect(), rb = elB.getBoundingClientRect();
+            var fence = document.createElement('div');
+            var horizontal = (r2 === nr); // side-by-side cells -> vertical fence bar between them
+            fence.className = 'maze-fence ' + (horizontal ? 'v' : 'h');
+            if(horizontal){
+              fence.style.left = ((ra.right + rb.left)/2 - boardRect.left - 3) + 'px';
+              fence.style.top = (Math.min(ra.top,rb.top) - boardRect.top + 4) + 'px';
+              fence.style.height = ((Math.max(ra.bottom,rb.bottom) - Math.min(ra.top,rb.top)) - 8) + 'px';
+            } else {
+              fence.style.top = ((ra.bottom + rb.top)/2 - boardRect.top - 3) + 'px';
+              fence.style.left = (Math.min(ra.left,rb.left) - boardRect.left + 4) + 'px';
+              fence.style.width = ((Math.max(ra.right,rb.right) - Math.min(ra.left,rb.left)) - 8) + 'px';
+            }
+            boardEl.appendChild(fence);
+          });
+        }
+      }
+    }
+
+    function placeCar(animate){
+      carEl.style.transition = animate ? '' : 'none';
+      carEl.style.left = (pos.c * 25) + '%';
+      carEl.style.top = (pos.r * 25) + '%';
+      if(!animate){ void carEl.offsetWidth; carEl.style.transition = ''; }
+    }
+
+    function isGoal(){ return pos.r === GOAL[0] && pos.c === GOAL[1]; }
+
+    function setControlsEnabled(enabled){
+      [upBtn,leftBtn,rightBtn,downBtn,undoBtn,hintBtn].forEach(function(b){ b.disabled = !enabled; });
+    }
+
+    function celebrate(){
+      won = true;
+      setControlsEnabled(false);
+      bubbleEl.textContent = 'しょうかだ！ みずを かけよう！';
+      showEffect(GOAL[0], GOAL[1], 'puddle');
+      beep(520, 0.1, 0, 'sine', 0.2);
+      beep(600, 0.12, 0.1, 'sine', 0.2);
+      beep(680, 0.14, 0.2, 'sine', 0.18);
+      setTimeout(function(){
+        if(goalImgEl){ goalImgEl.src = 'images/maze_goal_safe.png'; }
+        carEl.classList.add('win');
+        var isLast = stageIndex >= TOTAL_STAGES-1;
+        bubbleEl.textContent = isLast ? 'すごい！ ぜんぶ クリア できたね！' : 'やったね！ ひが きえたね！';
+        nextBtn.hidden = isLast;
+        replayBtn.textContent = isLast ? 'さいしょから あそぶ🎉' : 'もういちど あそぶ🎉';
+        winPanelEl.classList.add('show');
+        if(typeof playCelebrationSound === 'function') playCelebrationSound();
+        spawnStars && spawnStars(3);
+      }, 650);
+    }
+
+    function showEffect(r, c, type){
+      var el = document.createElement('div');
+      el.className = 'maze-effect ' + type;
+      el.textContent = OBSTACLE_EFFECT_EMOJI[type] || '💥';
+      el.style.left = (c * 25) + '%';
+      el.style.top = (r * 25) + '%';
+      boardWrapEl.appendChild(el);
+      setTimeout(function(){ el.remove(); }, 750);
+    }
+
+    function playTrapSound(type){
+      if(type === 'puddle'){
+        beep(520, 0.1, 0, 'sine', 0.18);
+        beep(380, 0.12, 0.07, 'sine', 0.16);
+        beep(300, 0.14, 0.14, 'sine', 0.14);
+      } else if(typeof playRejectSound === 'function'){
+        playRejectSound();
+      }
+    }
+
+    function hitTrap(nr, nc, type){
+      locked = true;
+      ensureAudio();
+      setControlsEnabled(false);
+      showEffect(nr, nc, type);
+      playTrapSound(type);
+      screenEl.classList.remove('shake'); void screenEl.offsetWidth; screenEl.classList.add('shake');
+      bubbleEl.textContent = type === 'puddle' ? 'あー！ みずたまりだ！ さいしょから！' : 'あー！ バリケードだ！ さいしょから！';
+      setTimeout(function(){
+        pos = { r: START[0], c: START[1] };
+        history = [];
+        placeCar(false);
+        bubbleEl.textContent = 'やじるしで すすもう！';
+        setControlsEnabled(true);
+        locked = false;
+      }, 700);
+    }
+
+    function tryMove(dr,dc,bx,by){
+      if(won || locked) return;
+      ensureAudio();
+      var nr = pos.r + dr, nc = pos.c + dc;
+      if(!inBounds(nr,nc)){
+        bump(bx,by);
+        return;
+      }
+      var curKey = key(pos.r,pos.c), nk = key(nr,nc);
+      if(!edgeSet.has(edgeKey(curKey,nk))){
+        bump(bx,by);
+        return;
+      }
+      if(trapCells[nk]){
+        hitTrap(nr, nc, trapCells[nk]);
+        return;
+      }
+      history.push({ r: pos.r, c: pos.c });
+      pos = { r: nr, c: nc };
+      placeCar(true);
+      beep(520, 0.1, 0, 'triangle', 0.16);
+      if(isGoal()){ setTimeout(celebrate, 320); }
+    }
+
+    function bump(bx,by){
+      carEl.style.setProperty('--bx', bx+'px');
+      carEl.style.setProperty('--by', by+'px');
+      carEl.classList.remove('bump'); void carEl.offsetWidth; carEl.classList.add('bump');
+      if(typeof playRejectSound === 'function') playRejectSound();
+    }
+
+    function undo(){
+      if(won || locked || !history.length) return;
+      ensureAudio();
+      pos = history.pop();
+      placeCar(true);
+      beep(360, 0.1, 0, 'triangle', 0.14);
+    }
+
+    function hint(){
+      if(won || locked) return;
+      ensureAudio();
+      // BFS over the solution graph only (edges between pathSet cells - traps
+      // are deliberately excluded so the hint never points into an obstacle).
+      var startK = key(pos.r,pos.c);
+      var goalKey = key(GOAL[0], GOAL[1]);
+      var visited = { };
+      visited[startK] = null;
+      var queue = [startK];
+      while(queue.length){
+        var cur = queue.shift();
+        if(cur === goalKey) break;
+        var parts = cur.split(','); var r = +parts[0], c = +parts[1];
+        var neighbors = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+        for(var i=0;i<neighbors.length;i++){
+          var nr = neighbors[i][0], nc = neighbors[i][1];
+          if(!inBounds(nr,nc)) continue;
+          var nk = key(nr,nc);
+          if(pathSet.has(nk) && edgeSet.has(edgeKey(cur,nk)) && !(nk in visited)){
+            visited[nk] = cur;
+            queue.push(nk);
+          }
+        }
+      }
+      if(!(goalKey in visited)) return;
+      var step = goalKey;
+      while(visited[step] !== startK && visited[step] !== null){ step = visited[step]; }
+      var stepParts = step.split(','); var sr = +stepParts[0], sc = +stepParts[1];
+      var dr = sr - pos.r, dc = sc - pos.c;
+      var btn = dr < 0 ? upBtn : (dr > 0 ? downBtn : (dc > 0 ? rightBtn : (dc < 0 ? leftBtn : null)));
+      if(btn){
+        btn.classList.remove('hint-glow'); void btn.offsetWidth; btn.classList.add('hint-glow');
+        setTimeout(function(){ btn.classList.remove('hint-glow'); }, 1600);
+      }
+    }
+
+    upBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); tryMove(-1,0,0,-8); });
+    downBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); tryMove(1,0,0,8); });
+    leftBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); tryMove(0,-1,-8,0); });
+    rightBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); tryMove(0,1,8,0); });
+    undoBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); undo(); });
+    hintBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); hint(); });
+    replayBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      if(stageIndex >= TOTAL_STAGES-1 && won){ stageIndex = 0; }
+      startStage();
+    });
+    nextBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      if(stageIndex < TOTAL_STAGES-1) stageIndex++;
+      startStage();
+    });
+
+    function startStage(){
+      generateMaze();
+      pos = { r: START[0], c: START[1] };
+      history = [];
+      won = false;
+      locked = false;
+      stageBadgeEl.textContent = 'ステージ ' + (stageIndex+1) + ' / ' + TOTAL_STAGES + '（' + DIFFICULTIES[stageIndex].label + '）';
+      bubbleEl.textContent = 'やじるしで すすもう！';
+      winPanelEl.classList.remove('show');
+      carEl.classList.remove('win');
+      setControlsEnabled(true);
+      buildBoard();
+      placeCar(false);
+    }
+
+    window.resetMazeGame = function(){ stageIndex = 0; startStage(); };
   })();
 
   /* ===================== init ===================== */
