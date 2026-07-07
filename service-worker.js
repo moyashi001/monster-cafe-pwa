@@ -14,6 +14,7 @@ const PRECACHE_ASSETS = [
   "./assets/images/btn_guruguru.png",
   "./assets/images/btn_seal.png",
   "./assets/images/title.png",
+  "./assets/images/haikei.png",
   "./icons/icon-120.png",
   "./icons/icon-152.png",
   "./icons/icon-167.png",
