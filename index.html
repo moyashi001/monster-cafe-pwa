@@ -529,31 +529,47 @@
   }
   .maze-cell.empty{ background-image:url('images/maze_grass_tile.png'); }
   .maze-cell.path{ background-image:url('images/maze_road_tile.png'); box-shadow:inset 0 0 0 2px rgba(255,255,255,.5); }
-  .maze-connector{ position:absolute; background-image:url('images/maze_road_tile.png'); background-size:cover; z-index:1; }
+  .maze-connector{ position:absolute; background-image:url('images/maze_road_tile.png'); background-size:cover; z-index:1; pointer-events:none; }
   .maze-fence{
-    position:absolute; z-index:4; border-radius:3px;
+    position:absolute; z-index:4; border-radius:3px; pointer-events:none;
     background:repeating-linear-gradient(135deg,#ff8a1f 0,#ff8a1f 6px,#fff 6px,#fff 12px);
     box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 0 0 1px rgba(0,0,0,.3);
   }
   .maze-fence.v{ width:6px; }
   .maze-fence.h{ height:6px; }
-  .maze-cell.goal, .maze-cell.start{ overflow:visible; z-index:5; }
-  .maze-cell.goal{ box-shadow:inset 0 0 0 4px var(--red); animation:mazePopGlow 1s ease-in-out infinite; --glow-color:192,57,43; }
-  .maze-cell.start{ box-shadow:inset 0 0 0 4px #2e9e4f; animation:mazePopGlow 1s ease-in-out infinite; --glow-color:46,158,79; }
+  .maze-cell.goal, .maze-cell.start{ overflow:visible; z-index:8; }
+  .maze-cell.goal{ box-shadow:inset 0 0 0 5px var(--red); animation:mazePopGlow 1s ease-in-out infinite; --glow-color:192,57,43; }
+  .maze-cell.start{ box-shadow:inset 0 0 0 5px #2e9e4f; animation:mazePopGlow 1s ease-in-out infinite; --glow-color:46,158,79; }
+  .maze-cell.goal::before, .maze-cell.start::before{
+    content:''; position:absolute; inset:-10%; border-radius:50%; z-index:-1;
+    background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 55%, rgba(255,255,255,0) 78%);
+  }
   @keyframes mazePopGlow{
-    0%,100%{ box-shadow:inset 0 0 0 4px rgba(var(--glow-color),1), 0 0 0 rgba(var(--glow-color),0); }
-    50%{ box-shadow:inset 0 0 0 5px rgba(var(--glow-color),1), 0 0 22px 4px rgba(var(--glow-color),.85); }
+    0%,100%{ box-shadow:inset 0 0 0 5px rgba(var(--glow-color),1), 0 0 0 rgba(var(--glow-color),0); }
+    50%{ box-shadow:inset 0 0 0 7px rgba(var(--glow-color),1), 0 0 28px 8px rgba(var(--glow-color),.9); }
   }
   .maze-cell-label{
-    position:absolute; top:-11px; left:50%; transform:translateX(-50%); z-index:6;
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%); z-index:9;
     font-size:clamp(9px,2.6vw,12px); font-weight:900; color:#fff; -webkit-text-stroke:2px rgba(0,0,0,.35);
     white-space:nowrap; line-height:1.4;
   }
-  .maze-cell.goal .maze-cell-label{ color:#ffe28a; }
-  .maze-cell.start .maze-cell-label{ color:#baffc9; }
+  .maze-cell.goal .maze-cell-label, .maze-cell.start .maze-cell-label{
+    /* Contained INSIDE the cell's own box (not a negative top like the
+       default label) - a bigger pill that spills upward would cover
+       whatever gimmick sits in the row above instead of just this cell. */
+    font-size:clamp(10px,3vw,13px); top:2%; padding:1px 8px; border-radius:999px;
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .maze-cell.goal .maze-cell-label{ color:#fff; background:var(--red); }
+  .maze-cell.start .maze-cell-label{ color:#fff; background:#2e9e4f; }
+  .maze-gimmick-label{ font-size:clamp(7px,2vw,9px); top:-9px; }
+  .maze-cell.gimmick-warp .maze-gimmick-label{ color:#d8c6ff; }
+  .maze-cell.gimmick-light .maze-gimmick-label{ color:#ffe9b0; }
+  .maze-cell.gimmick-switch .maze-gimmick-label{ color:#fff6c9; }
+  .maze-cell.gimmick-gate .maze-gimmick-label{ color:#c6e0ff; }
   .maze-cell img.maze-cell-icon{ width:88%; height:88%; object-fit:contain; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
   .maze-cell.goal img.maze-cell-icon, .maze-cell.start img.maze-cell-icon{
-    width:132%; height:132%; animation:mazePopBounce 1s ease-in-out infinite;
+    width:152%; height:152%; animation:mazePopBounce 1s ease-in-out infinite;
   }
   @keyframes mazePopBounce{
     0%,100%{ transform:translateY(0) scale(1); }
@@ -586,9 +602,24 @@
     55%{ transform:scale(1.2) translateX(6px); filter:hue-rotate(0deg) drop-shadow(0 0 8px #2c6fce); }
     75%{ transform:scale(1.1) translateX(-4px); filter:hue-rotate(0deg) drop-shadow(0 0 8px #e63946); }
   }
-  .maze-cell.bridge{ box-shadow:inset 0 0 0 3px #7a4fd6; }
-  .maze-cell.bridge img.maze-cell-icon{ animation:mazeBridgeSpin 3s linear infinite; }
-  @keyframes mazeBridgeSpin{ 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+  /* Gimmick cells (warp/light/switch/gate) need their own raised
+     z-index, same as start/goal - otherwise the positive z-index connector
+     and fence overlays (drawn as later, positively-stacked siblings in
+     #mazeBoard) paint on top of them and hide their icon entirely. */
+  .maze-cell.gimmick-warp, .maze-cell.gimmick-light,
+  .maze-cell.gimmick-switch, .maze-cell.gimmick-gate, .maze-cell.has-icon{
+    overflow:visible; z-index:5;
+  }
+  .maze-cell.gimmick-warp{ box-shadow:inset 0 0 0 3px #7a4fd6, 0 0 10px 2px rgba(122,79,214,.7); }
+  .maze-cell.gimmick-light{ box-shadow:inset 0 0 0 3px #e2a637, 0 0 10px 2px rgba(226,166,55,.7); }
+  .maze-cell.gimmick-switch{ box-shadow:inset 0 0 0 3px #f4d13d, 0 0 10px 2px rgba(244,209,61,.7); }
+  .maze-cell.gimmick-gate{ box-shadow:inset 0 0 0 3px #2c6fce, 0 0 10px 2px rgba(44,111,206,.7); }
+  .maze-cell.gimmick-warp img.maze-cell-icon, .maze-cell.gimmick-light img.maze-cell-icon,
+  .maze-cell.gimmick-switch img.maze-cell-icon,
+  .maze-cell.gimmick-gate img.maze-cell-icon{
+    width:108%; height:108%;
+  }
+  .maze-cell.gimmick-warp.warp-b img.maze-cell-icon{ filter:hue-rotate(140deg); }
   #mazeCar.spin{ animation:mazeCarSpin .55s ease-in-out; }
   @keyframes mazeCarSpin{
     0%{ transform:rotate(0deg) scale(1); }
@@ -639,6 +670,7 @@
     50%{ filter:brightness(1.5); }
   }
   .maze-btn.hint-glow{ animation:mazeHintGlow .5s ease-in-out 3; }
+  .maze-cell.hint-glow{ animation:mazeHintGlow .5s ease-in-out 3; z-index:8; }
   #mazeWinPanel{
     flex:0 0 auto; display:none; flex-direction:column; align-items:center; gap:8px;
   }
@@ -656,6 +688,44 @@
     box-shadow:0 5px 0 #8a5810; font-family:inherit;
   }
   #mazeReplayBtn:active{ box-shadow:0 2px 0 #8a5810; transform:translateY(3px); }
+
+  /* ---- advanced tier: finger-trace controls, gimmick states, hero badge ---- */
+  #mazeDpad.hidden, #mazeUndoBtn.hidden{ display:none; }
+  #mazeBoard.tracing{ touch-action:none; }
+  #mazeCar.siren{ animation:mazeSirenFlash .35s steps(1) infinite; }
+  @keyframes mazeSirenFlash{
+    0%,100%{ filter:drop-shadow(0 0 10px #e63946) drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+    50%{ filter:drop-shadow(0 0 10px #2c6fce) drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+  }
+  .maze-gimmick-dot{
+    position:absolute; top:6%; right:6%; width:22%; height:22%; border-radius:50%;
+    box-shadow:0 0 0 2px rgba(0,0,0,.4); z-index:7; pointer-events:none;
+  }
+  .maze-gimmick-dot.red{ background:#e63946; box-shadow:0 0 0 2px rgba(0,0,0,.4), 0 0 8px #e63946; }
+  .maze-gimmick-dot.green{ background:#3ec26f; box-shadow:0 0 0 2px rgba(0,0,0,.4), 0 0 8px #3ec26f; }
+  /* Blocked gimmicks get a small corner status badge instead of tinting the
+     whole cell - a full-cell overlay made the actual icon underneath (gate)
+     hard to see or read as "no image here". */
+  .maze-gimmick-status{
+    position:absolute; bottom:2%; right:2%; width:34%; height:34%; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:65%;
+    background:#e63946; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 6px rgba(230,57,70,.8);
+    z-index:7; pointer-events:none;
+  }
+  .maze-cell.gimmick-blocked .maze-gimmick-status{ display:flex; }
+  .maze-gimmick-status{ display:none; }
+  #mazeBadgePopup{
+    position:fixed; inset:0; z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; background:rgba(40,20,60,.72); opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  #mazeBadgePopup.show{ opacity:1; pointer-events:auto; }
+  .maze-badge-card{ display:flex; flex-direction:column; align-items:center; gap:10px; transform:scale(0); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
+  #mazeBadgePopup.show .maze-badge-card{ transform:scale(1); }
+  .maze-badge-card img{ width:min(48vw,200px); height:min(48vw,200px); object-fit:contain; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); }
+  .maze-badge-title{
+    font-size:clamp(20px,6vw,30px); font-weight:900; color:#fff;
+    text-shadow:0 3px 0 var(--red), 0 0 20px rgba(255,220,120,.8);
+  }
 </style>
 </head>
 <body>
@@ -685,7 +755,7 @@
         <img class="home-card-img" src="assets/images/btn_seal.png" alt="シール ちょう">
       </button>
     </div>
-    <div id="app-version">v2.0.0</div>
+    <div id="app-version">v2.1.0</div>
   </div>
 
   <!-- ================= GAME 1: COUNTING ================= -->
@@ -790,6 +860,7 @@
       <div class="speech-bubble">なんいどを えらんでね！</div>
       <button class="menu-btn maze-diff-btn" data-mode="beginner" style="background:linear-gradient(180deg,#6fb3ff,#2c6fce);">しょきゅう</button>
       <button class="menu-btn maze-diff-btn" data-mode="intermediate" style="background:linear-gradient(180deg,#a3e08a,#4a9a4a);">ちゅうきゅう</button>
+      <button class="menu-btn maze-diff-btn" data-mode="advanced" style="background:linear-gradient(180deg,#ff9ec9,#e2508e);">じょうきゅう</button>
     </div>
 
     <div class="maze-body" id="mazePlayArea" style="display:none;">
@@ -799,7 +870,7 @@
         <div id="mazeCar"><img src="images/maze_car.png" alt="くるま"></div>
       </div>
       <div id="mazeControls">
-        <div class="maze-dpad">
+        <div class="maze-dpad" id="mazeDpad">
           <button class="maze-btn" id="mazeUpBtn" aria-label="すすむ">▲</button>
           <button class="maze-btn" id="mazeLeftBtn" aria-label="ひだりへ">◀</button>
           <button class="maze-btn" id="mazeRightBtn" aria-label="みぎへ">▶</button>
@@ -807,12 +878,19 @@
         </div>
         <div class="maze-sub-row">
           <button class="maze-btn-sub" id="mazeUndoBtn">↩ もどる</button>
+          <button class="maze-btn-sub" id="mazeResetBtn" hidden>🔄 リセット</button>
           <button class="maze-btn-sub" id="mazeHintBtn">💡 ヒント</button>
         </div>
       </div>
       <div id="mazeWinPanel">
         <button id="mazeNextBtn">つぎの ステージへ ▶</button>
         <button id="mazeReplayBtn">もういちど あそぶ🎉</button>
+      </div>
+      <div id="mazeBadgePopup">
+        <div class="maze-badge-card">
+          <img id="mazeBadgeImg" src="images/maze_badge_hero.png" alt="バッジ">
+          <div class="maze-badge-title">まちの ヒーロー</div>
+        </div>
       </div>
     </div>
   </div>
@@ -2312,7 +2390,7 @@
   (function(){
     var MODES = {
       beginner: {
-        label:'しょきゅう', gridSize:4, hasBridge:false,
+        label:'しょきゅう', gridRows:4, gridCols:4, hasWarp:false,
         bgImg:'images/maze_bg.png',
         carImg:'images/maze_car.png', carAlt:'くるま',
         startImg:'images/maze_start_station.png', startAlt:'スタート（しょうぼうしょ）',
@@ -2320,17 +2398,15 @@
         winEffect:'puddle',
         winPreText:'しょうかだ！ みずを かけよう！',
         winPostText:'やったね！ ひが きえたね！',
-        // "branches" are plain dead-end road forks (no obstacle, just a wrong
-        // turn you back out of with もどる) - more of them means less bare
-        // grass and more decisions at each junction.
+        obstacleTypes: ['barricade','puddle'],
         stages: [
-          { label:'しょきゅう', traps:1, branches:2 },
-          { label:'ちゅうきゅう', traps:2, branches:2 },
-          { label:'じょうきゅう', traps:3, branches:2 }
+          { label:'しょきゅう', traps:2 },
+          { label:'ちゅうきゅう', traps:3 },
+          { label:'じょうきゅう', traps:4 }
         ]
       },
       intermediate: {
-        label:'ちゅうきゅう', gridSize:5, hasBridge:true,
+        label:'ちゅうきゅう', gridRows:5, gridCols:5, hasWarp:true,
         bgImg:'images/maze_bg_intermediate.png',
         carImg:'images/maze_car_police.png', carAlt:'パトカー',
         startImg:'images/maze_start_police.png', startAlt:'スタート（けいさつしょ）',
@@ -2338,16 +2414,37 @@
         winEffect:'arrest',
         winPreText:'たいほだ！',
         winPostText:'やったね！ たいほ できたね！',
+        obstacleTypes: ['barricade','puddle'],
         stages: [
-          { label:'1', traps:2, branches:5 },
-          { label:'2', traps:3, branches:5 },
-          { label:'3', traps:4, branches:5 }
+          { label:'1', traps:3 },
+          { label:'2', traps:4 },
+          { label:'3', traps:5 }
+        ]
+      },
+      advanced: {
+        label:'じょうきゅう', gridRows:10, gridCols:7, hasWarp:true, hasLight:true, hasSwitch:true,
+        traceControl:true,
+        bgImg:'images/maze_bg_advanced.png',
+        carImg:'images/maze_car.png', carAlt:'しょうぼうしゃ',
+        startImg:'', startAlt:'',
+        goalImg:'images/maze_start_station.png', goalSafeImg:'images/maze_start_station.png', goalAlt:'ゴール（しょうぼうしょ）',
+        winEffect:'siren',
+        winPreText:'ピカピカ！',
+        winPostText:'やったね！ かえって きたね！',
+        obstacleTypes: ['cone','fallenTree','puddle','trafficjam'],
+        stages: [
+          { label:'1', traps:5 },
+          { label:'2', traps:6 },
+          { label:'3', traps:7 }
         ]
       }
     };
-    var OBSTACLE_TYPES = ['barricade','puddle'];
-    var OBSTACLE_ICON = { barricade:'images/maze_obstacle_barricade.png', puddle:'images/maze_obstacle_puddle.png' };
-    var EFFECT_EMOJI = { barricade:'💥', puddle:'💦', arrest:'🚨' };
+    var OBSTACLE_ICON = {
+      barricade:'images/maze_obstacle_barricade.png', puddle:'images/maze_obstacle_puddle.png',
+      cone:'images/maze_obstacle_cone.png', fallenTree:'images/maze_obstacle_fallen_tree.png',
+      trafficjam:'images/maze_obstacle_trafficjam.png'
+    };
+    var EFFECT_EMOJI = { barricade:'💥', puddle:'💦', arrest:'🚨', cone:'🚧', fallenTree:'🌳', trafficjam:'🚙' };
 
     var diffSelectEl = document.getElementById('mazeDifficultySelect');
     var playAreaEl = document.getElementById('mazePlayArea');
@@ -2363,6 +2460,9 @@
     var rightBtn = document.getElementById('mazeRightBtn');
     var downBtn = document.getElementById('mazeDownBtn');
     var undoBtn = document.getElementById('mazeUndoBtn');
+    var resetBtn = document.getElementById('mazeResetBtn');
+    var dpadEl = document.getElementById('mazeDpad');
+    var badgePopupEl = document.getElementById('mazeBadgePopup');
     var hintBtn = document.getElementById('mazeHintBtn');
     var nextBtn = document.getElementById('mazeNextBtn');
     var replayBtn = document.getElementById('mazeReplayBtn');
@@ -2370,25 +2470,28 @@
     var backBtn = document.getElementById('mazeBackBtn');
 
     var currentMode = null;
-    var GRID_SIZE = 4;
+    var GRID_ROWS = 4, GRID_COLS = 4;
     var START = [3,0], GOAL = [0,3]; // overwritten each generateMaze() call by pickStartGoal()
     var stageIndex = 0;
     var pathSet = null;    // Set of "r,c" cells that make up the solvable route (incl. start/goal)
     var edgeSet = null;    // Set of canonical "r,c|r,c" strings: legal moves between adjacent cells
     var trapCells = null;  // {"r,c": "barricade"|"puddle"}
     var pathEdgePairs = null; // [["r,c","r,c"], ...] consecutive solution-path links, for connector bridges
-    var bridgeCell = null;    // "r,c" of the rotating-bridge cell, or null if this mode has none
-    var bridgeExits = null;   // {a:"r,c", b:"r,c"} - the bridge's two trail neighbors
+    var warpCellA = null, warpCellB = null; // "r,c" fixed pair of warp-tunnel cells, or null if this mode has none
+    var lightCell = null, lightState = 'green';       // traffic light gate: 'red' blocks, 'green' passes
+    var switchCell = null, gateCell = null, gateOpen = false; // pressure switch toggles the linked gate
+    var gimmickTimers = [];   // interval ids for light cycling, cleared on stage/mode change
+    var lightDotEl = null, lightCellEl = null, gateCellEl = null; // live refs for state repaint
     var goalImgEl = null;  // the <img> for the current goal cell, swapped to the "safe" image on win
     var pos = null;        // {r,c}
     var history = [];      // stack of previous {r,c}
     var won = false;
-    var locked = false;    // true while a trap/bridge effect or reset animation is playing
+    var locked = false;    // true while a trap/warp effect or reset animation is playing
 
     function cfg(){ return MODES[currentMode]; }
     function key(r,c){ return r+','+c; }
     function edgeKey(a,b){ return a < b ? a+'|'+b : b+'|'+a; }
-    function inBounds(r,c){ return r>=0 && r<GRID_SIZE && c>=0 && c<GRID_SIZE; }
+    function inBounds(r,c){ return r>=0 && r<GRID_ROWS && c>=0 && c<GRID_COLS; }
     function shuffle(arr){
       for(var i=arr.length-1;i>0;i--){
         var j = Math.floor(Math.random()*(i+1));
@@ -2405,138 +2508,196 @@
     function pickStartGoal(){
       var s, g;
       do{
-        s = [Math.floor(Math.random()*GRID_SIZE), Math.floor(Math.random()*GRID_SIZE)];
-        g = [Math.floor(Math.random()*GRID_SIZE), Math.floor(Math.random()*GRID_SIZE)];
-      } while(manhattan(s,g) < GRID_SIZE);
+        s = [Math.floor(Math.random()*GRID_ROWS), Math.floor(Math.random()*GRID_COLS)];
+        g = [Math.floor(Math.random()*GRID_ROWS), Math.floor(Math.random()*GRID_COLS)];
+      } while(manhattan(s,g) < Math.min(GRID_ROWS,GRID_COLS));
       START = s; GOAL = g;
     }
 
     // Randomized backtracking walk from START to GOAL, producing one simple
     // (non-branching) solution path - a fresh shape every time it's called.
-    function carvePath(){
-      var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
+    // Randomized Prim's algorithm: grows the maze outward from every point on
+    // its current edge at once (a "frontier" of candidate cells), rather than
+    // snaking away from a single head like a recursive backtracker does.
+    // That keeps growth spread out fairly evenly across the whole grid -
+    // no far corner ends up as one long lonely corridor that reads as
+    // "unused" - while still producing a proper spanning tree (every one of
+    // the GRID_ROWS*GRID_COLS cells reachable, exactly one route between
+    // any two cells, dead ends everywhere).
+    function carveFullMaze(){
+      var startKey = key(START[0],START[1]);
       var visited = {}; visited[startKey] = true;
-      var trail = [startKey];
-      function dfs(curKey){
-        if(curKey === goalKey) return true;
-        var parts = curKey.split(','); var r = +parts[0], c = +parts[1];
-        var nbrs = gridNeighbors(r,c);
-        for(var i=0;i<nbrs.length;i++){
-          var nk = key(nbrs[i][0], nbrs[i][1]);
-          if(!visited[nk]){
-            visited[nk] = true;
-            trail.push(nk);
-            if(dfs(nk)) return true;
-            trail.pop();
-            visited[nk] = false; // un-mark: only cells on the *current* trail should block reuse
-          }
-        }
-        return false;
+      var edges = new Set();
+      var pairs = [];
+      var frontier = []; // [fromKey, toKey] candidate connections into the maze
+      function addFrontier(k){
+        var parts = k.split(','); var r = +parts[0], c = +parts[1];
+        gridNeighbors(r,c).forEach(function(nb){
+          var nk = key(nb[0], nb[1]);
+          if(!visited[nk]) frontier.push([k, nk]);
+        });
       }
-      dfs(startKey);
-      return trail;
+      addFrontier(startKey);
+      while(frontier.length){
+        var idx = Math.floor(Math.random()*frontier.length);
+        var pick = frontier.splice(idx, 1)[0];
+        var from = pick[0], to = pick[1];
+        if(visited[to]) continue; // may have been claimed by another frontier entry since
+        visited[to] = true;
+        edges.add(edgeKey(from, to));
+        pairs.push([from, to]);
+        addFrontier(to);
+      }
+      return { edges: edges, pairs: pairs, visited: visited };
+    }
+
+    // BFS over the maze's tree edges to find the (unique) direct route from
+    // start to goal - this is the "trail" that gimmicks get placed along.
+    function treePath(edges, startKey, goalKey){
+      var adjacency = {};
+      edges.forEach(function(e){
+        var parts = e.split('|');
+        (adjacency[parts[0]] = adjacency[parts[0]] || []).push(parts[1]);
+        (adjacency[parts[1]] = adjacency[parts[1]] || []).push(parts[0]);
+      });
+      var visited = {}; visited[startKey] = null;
+      var queue = [startKey];
+      while(queue.length){
+        var cur = queue.shift();
+        if(cur === goalKey) break;
+        (adjacency[cur]||[]).forEach(function(nb){
+          if(!(nb in visited)){ visited[nb] = cur; queue.push(nb); }
+        });
+      }
+      var path = [goalKey];
+      var step = goalKey;
+      while(step !== startKey){ step = visited[step]; path.push(step); }
+      path.reverse();
+      return path;
     }
 
     function generateMaze(){
       pickStartGoal();
-      var trail = carvePath();
-      var solutionSet = {};
-      trail.forEach(function(k){ solutionSet[k] = true; });
-      var occupied = {};
-      trail.forEach(function(k){ occupied[k] = true; });
-      var edges = new Set();
-      var pairs = []; // walkable-to-walkable edges (main path + decoys), for drawing connector bridges
-      for(var i=0;i<trail.length-1;i++){
-        edges.add(edgeKey(trail[i], trail[i+1]));
-        pairs.push([trail[i], trail[i+1]]);
-      }
-
-      // Rotating bridge gimmick (intermediate mode): pick an interior trail
-      // node - landing there auto-continues to the OTHER trail neighbor,
-      // which often isn't the direction you'd expect.
-      bridgeCell = null; bridgeExits = null;
-      if(cfg().hasBridge && trail.length >= 3){
-        var bi2 = 1 + Math.floor(Math.random()*(trail.length-2));
-        bridgeCell = trail[bi2];
-        bridgeExits = { a: trail[bi2-1], b: trail[bi2+1] };
-        // Fill in the bridge's remaining grid side(s) as plain dead-end road
-        // too, so all four directions around it look walkable - only the
-        // two trail sides actually lead anywhere; the rest are just a dead
-        // end you back out of, depending on which way you wandered in.
-        var bp = bridgeCell.split(','); var bR = +bp[0], bC = +bp[1];
-        gridNeighbors(bR,bC).forEach(function(nb){
-          var nk0 = key(nb[0], nb[1]);
-          if(!occupied[nk0]){
-            solutionSet[nk0] = true;
-            edges.add(edgeKey(bridgeCell, nk0));
-            pairs.push([bridgeCell, nk0]);
-            occupied[nk0] = true;
-          }
-        });
-      }
-
-      var traps = {};
       var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
+      var maze = carveFullMaze();
+      var trail = treePath(maze.edges, startKey, goalKey);
+      var trailSet = {}; trail.forEach(function(k){ trailSet[k] = true; });
+
+      var usedIdx = {};
+      function pickInteriorIdx(){
+        if(trail.length < 4) return null;
+        for(var tries=0; tries<20; tries++){
+          var idx = 1 + Math.floor(Math.random()*(trail.length-2));
+          if(!usedIdx[idx]){ usedIdx[idx] = true; return idx; }
+        }
+        return null;
+      }
+
+      lightCell = null; lightState = 'green';
+      if(cfg().hasLight){
+        var li = pickInteriorIdx();
+        if(li != null) lightCell = trail[li];
+      }
+      // The gate sits ON the direct route (it genuinely blocks progress),
+      // but its switch is deliberately placed on a SIDE branch off the trail
+      // - so there's a real chance of walking past without noticing it,
+      // unlike before when both were mandatory stops on the one road.
+      switchCell = null; gateCell = null; gateOpen = false;
+      if(cfg().hasSwitch){
+        var gi = pickInteriorIdx();
+        if(gi != null){
+          gateCell = trail[gi];
+          var reservedSoFar = {}; [lightCell, gateCell].forEach(function(k){ if(k) reservedSoFar[k]=true; });
+          // The switch's own access route from start must NOT cross the gate
+          // cell - otherwise you'd have to pass the (closed) gate just to
+          // reach the switch that opens it, a permanent deadlock. Only trail
+          // nodes BEFORE the gate (trail[0..gi-1]) can safely branch off to
+          // an off-trail switch.
+          var beforeGateSet = {};
+          for(var pgi=0; pgi<gi; pgi++){ beforeGateSet[trail[pgi]] = true; }
+          var offTrailCandidates = shuffle(Object.keys(maze.visited).filter(function(k){
+            if(trailSet[k] || reservedSoFar[k]) return false;
+            var accessPath = treePath(maze.edges, startKey, k);
+            return accessPath.every(function(pk){ return !trailSet[pk] || beforeGateSet[pk] || pk === startKey; });
+          }));
+          if(offTrailCandidates.length) switchCell = offTrailCandidates[0];
+          else gateCell = null; // no room for an off-trail switch - skip the gate too rather than make it unsolvable
+        }
+      }
+
+      // Warp tunnel: a fixed pair of OFF-TRAIL cells that instantly swap the
+      // car between them. Both ends live on side branches, never on the
+      // direct start->goal route, so stepping into either one is a pure
+      // optional shortcut/bonus - it can never short-circuit the main trail
+      // or strand any cell in between.
+      warpCellA = null; warpCellB = null;
+      if(cfg().hasWarp){
+        var warpReservedSoFar = {}; [lightCell, switchCell, gateCell].forEach(function(k){ if(k) warpReservedSoFar[k]=true; });
+        var warpCandidates = shuffle(Object.keys(maze.visited).filter(function(k){
+          return !trailSet[k] && !warpReservedSoFar[k];
+        }));
+        if(warpCandidates.length >= 2){
+          warpCellA = warpCandidates[0];
+          warpCellB = warpCandidates[1];
+        }
+      }
+
+      // Obstacles go on non-trail cells - real branches of the maze that
+      // exist purely to mislead, so wandering off the direct route can be
+      // punished without ever making part of the grid truly unreachable.
+      // Critically, the switch and both warp cells are only useful if you can
+      // actually WALK to them, so every cell on their one-and-only access
+      // route from the trail is off-limits to traps too - otherwise an
+      // obstacle could seal one off and make it permanently unreachable.
+      var reserved = {};
+      [lightCell, switchCell, gateCell, warpCellA, warpCellB].forEach(function(k){ if(k) reserved[k] = true; });
+      if(switchCell){
+        treePath(maze.edges, startKey, switchCell).forEach(function(k){ reserved[k] = true; });
+      }
+      if(warpCellA){
+        treePath(maze.edges, startKey, warpCellA).forEach(function(k){ reserved[k] = true; });
+      }
+      if(warpCellB){
+        treePath(maze.edges, startKey, warpCellB).forEach(function(k){ reserved[k] = true; });
+      }
+      var obstacleTypes = cfg().obstacleTypes;
       var trapWanted = cfg().stages[stageIndex].traps;
-      var trapCandidates = shuffle(trail.filter(function(k){ return k !== startKey && k !== goalKey; }));
-      var trapsPlaced = 0;
-      for(var ci=0; ci<trapCandidates.length && trapsPlaced<trapWanted; ci++){
-        var parts = trapCandidates[ci].split(','); var r = +parts[0], c = +parts[1];
-        var nbrs = gridNeighbors(r,c);
-        for(var ni=0; ni<nbrs.length; ni++){
-          var nk = key(nbrs[ni][0], nbrs[ni][1]);
-          if(!occupied[nk]){
-            traps[nk] = OBSTACLE_TYPES[trapsPlaced % OBSTACLE_TYPES.length];
-            edges.add(edgeKey(trapCandidates[ci], nk));
-            occupied[nk] = true;
-            trapsPlaced++;
-            break;
-          }
-        }
+      var trapCandidates = shuffle(Object.keys(maze.visited).filter(function(k){
+        return !trailSet[k] && !reserved[k];
+      }));
+      var traps = {};
+      for(var ti=0; ti<trapCandidates.length && ti<trapWanted; ti++){
+        traps[trapCandidates[ti]] = obstacleTypes[ti % obstacleTypes.length];
       }
 
-      // Plain dead-end road forks: look like more path, lead nowhere, no
-      // obstacle - just a wrong turn you back out of with もどる. (Excludes
-      // the bridge cell so its auto-continue direction stays unambiguous.)
-      var branchWanted = cfg().stages[stageIndex].branches;
-      var branchCandidates = shuffle(trail.filter(function(k){ return k !== bridgeCell; }));
-      var branchesPlaced = 0;
-      for(var bi=0; bi<branchCandidates.length && branchesPlaced<branchWanted; bi++){
-        var bparts = branchCandidates[bi].split(','); var br = +bparts[0], bc = +bparts[1];
-        var bnbrs = gridNeighbors(br,bc);
-        for(var bni=0; bni<bnbrs.length; bni++){
-          var bnk = key(bnbrs[bni][0], bnbrs[bni][1]);
-          if(!occupied[bnk]){
-            solutionSet[bnk] = true;
-            edges.add(edgeKey(branchCandidates[bi], bnk));
-            pairs.push([branchCandidates[bi], bnk]);
-            occupied[bnk] = true;
-            branchesPlaced++;
-            break;
-          }
-        }
-      }
-
-      pathSet = new Set(Object.keys(solutionSet));
-      edgeSet = edges;
+      pathSet = new Set(Object.keys(maze.visited));
+      edgeSet = maze.edges;
       trapCells = traps;
-      pathEdgePairs = pairs;
+      pathEdgePairs = maze.pairs;
+    }
+
+    function addGimmickLabel(cell, text){
+      var label = document.createElement('span');
+      label.className = 'maze-cell-label maze-gimmick-label';
+      label.textContent = text;
+      cell.appendChild(label);
     }
 
     function buildBoard(){
-      boardEl.style.gridTemplateColumns = 'repeat(' + GRID_SIZE + ',minmax(0,1fr))';
-      boardEl.style.gridTemplateRows = 'repeat(' + GRID_SIZE + ',minmax(0,1fr))';
+      boardEl.style.gridTemplateColumns = 'repeat(' + GRID_COLS + ',minmax(0,1fr))';
+      boardEl.style.gridTemplateRows = 'repeat(' + GRID_ROWS + ',minmax(0,1fr))';
       boardEl.innerHTML = '';
       var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
       var cellEls = {};
-      for(var r=0;r<GRID_SIZE;r++){
-        for(var c=0;c<GRID_SIZE;c++){
+      for(var r=0;r<GRID_ROWS;r++){
+        for(var c=0;c<GRID_COLS;c++){
           var cell = document.createElement('div');
           var k = key(r,c);
           // Every cell is a road tile now (no unused grass) - the fence pass
           // below marks the boundaries you actually can't cross.
           cell.className = 'maze-cell path';
-          if(k === startKey){
+          cell.dataset.r = r; cell.dataset.c = c;
+          if(k === startKey && cfg().startImg){
             cell.classList.add('start');
             var label1 = document.createElement('span');
             label1.className = 'maze-cell-label'; label1.textContent = 'スタート';
@@ -2546,6 +2707,11 @@
             flag.src = cfg().startImg;
             flag.alt = cfg().startAlt;
             cell.appendChild(flag);
+          } else if(k === startKey){
+            cell.classList.add('start');
+            var label1b = document.createElement('span');
+            label1b.className = 'maze-cell-label'; label1b.textContent = 'スタート';
+            cell.appendChild(label1b);
           }
           if(k === goalKey){
             cell.classList.add('goal');
@@ -2557,14 +2723,49 @@
             goalImgEl.src = cfg().goalImg;
             goalImgEl.alt = cfg().goalAlt;
             cell.appendChild(goalImgEl);
-          } else if(k === bridgeCell){
-            cell.classList.add('bridge');
-            var bridgeImg = document.createElement('img');
-            bridgeImg.className = 'maze-cell-icon';
-            bridgeImg.src = 'images/maze_bridge.png';
-            bridgeImg.alt = 'かいてんばし';
-            cell.appendChild(bridgeImg);
+          } else if(k === warpCellA || k === warpCellB){
+            cell.classList.add('gimmick-warp');
+            if(k === warpCellB) cell.classList.add('warp-b');
+            addGimmickLabel(cell, 'ワープ');
+            var warpImg = document.createElement('img');
+            warpImg.className = 'maze-cell-icon';
+            warpImg.src = 'images/maze_warp.png';
+            warpImg.alt = 'ワープトンネル';
+            cell.appendChild(warpImg);
+          } else if(k === lightCell){
+            cell.classList.add('gimmick-light');
+            addGimmickLabel(cell, 'しんごう');
+            var lightImg = document.createElement('img');
+            lightImg.className = 'maze-cell-icon';
+            lightImg.src = 'images/maze_gimmick_light.png';
+            lightImg.alt = 'しんごう';
+            cell.appendChild(lightImg);
+            lightDotEl = document.createElement('span');
+            lightDotEl.className = 'maze-gimmick-dot';
+            cell.appendChild(lightDotEl);
+            lightCellEl = cell;
+          } else if(k === switchCell){
+            cell.classList.add('gimmick-switch');
+            addGimmickLabel(cell, 'スイッチ');
+            var swImg = document.createElement('img');
+            swImg.className = 'maze-cell-icon';
+            swImg.src = 'images/maze_gimmick_switch.png';
+            swImg.alt = 'スイッチ';
+            cell.appendChild(swImg);
+          } else if(k === gateCell){
+            cell.classList.add('gimmick-gate');
+            addGimmickLabel(cell, 'ゲート');
+            var gateImg = document.createElement('img');
+            gateImg.className = 'maze-cell-icon';
+            gateImg.src = 'images/maze_gimmick_gate.png';
+            gateImg.alt = 'ゲート';
+            cell.appendChild(gateImg);
+            var gateStatus = document.createElement('span');
+            gateStatus.className = 'maze-gimmick-status'; gateStatus.textContent = '🔒';
+            cell.appendChild(gateStatus);
+            gateCellEl = cell;
           } else if(trapCells[k]){
+            cell.classList.add('has-icon');
             var obsImg = document.createElement('img');
             obsImg.className = 'maze-cell-icon';
             obsImg.src = OBSTACLE_ICON[trapCells[k]] || '';
@@ -2598,8 +2799,8 @@
       // Every cell is a road tile now, so any two grid-adjacent cells that
       // AREN'T bridged above have no legal move between them - mark that
       // boundary with a little fence so it reads as blocked, not just empty.
-      for(var r2=0; r2<GRID_SIZE; r2++){
-        for(var c2=0; c2<GRID_SIZE; c2++){
+      for(var r2=0; r2<GRID_ROWS; r2++){
+        for(var c2=0; c2<GRID_COLS; c2++){
           var k2 = key(r2,c2);
           [[r2+1,c2],[r2,c2+1]].forEach(function(nb){
             var nr = nb[0], nc = nb[1];
@@ -2629,11 +2830,11 @@
 
     function placeCar(animate){
       carEl.style.transition = animate ? '' : 'none';
-      var step = 100/GRID_SIZE;
-      carEl.style.width = step + '%';
-      carEl.style.height = step + '%';
-      carEl.style.left = (pos.c * step) + '%';
-      carEl.style.top = (pos.r * step) + '%';
+      var stepX = 100/GRID_COLS, stepY = 100/GRID_ROWS;
+      carEl.style.width = stepX + '%';
+      carEl.style.height = stepY + '%';
+      carEl.style.left = (pos.c * stepX) + '%';
+      carEl.style.top = (pos.r * stepY) + '%';
       if(!animate){ void carEl.offsetWidth; carEl.style.transition = ''; }
     }
 
@@ -2645,27 +2846,41 @@
 
     function celebrate(){
       won = true;
+      clearGimmickTimers();
       setControlsEnabled(false);
       var c = cfg();
       bubbleEl.textContent = c.winPreText;
-      showEffect(GOAL[0], GOAL[1], c.winEffect);
-      if(c.winEffect === 'arrest'){
-        beep(700, 0.08, 0, 'square', 0.2);
-        beep(500, 0.08, 0.12, 'square', 0.2);
-        beep(700, 0.08, 0.24, 'square', 0.2);
-        beep(500, 0.08, 0.36, 'square', 0.2);
+      if(c.winEffect === 'siren'){
+        carEl.classList.add('siren');
+        beep(880, 0.15, 0, 'square', 0.18);
+        beep(660, 0.15, 0.16, 'square', 0.18);
+        beep(880, 0.15, 0.32, 'square', 0.18);
+        beep(660, 0.15, 0.48, 'square', 0.18);
       } else {
-        beep(520, 0.1, 0, 'sine', 0.2);
-        beep(600, 0.12, 0.1, 'sine', 0.2);
-        beep(680, 0.14, 0.2, 'sine', 0.18);
+        showEffect(GOAL[0], GOAL[1], c.winEffect);
+        if(c.winEffect === 'arrest'){
+          beep(700, 0.08, 0, 'square', 0.2);
+          beep(500, 0.08, 0.12, 'square', 0.2);
+          beep(700, 0.08, 0.24, 'square', 0.2);
+          beep(500, 0.08, 0.36, 'square', 0.2);
+        } else {
+          beep(520, 0.1, 0, 'sine', 0.2);
+          beep(600, 0.12, 0.1, 'sine', 0.2);
+          beep(680, 0.14, 0.2, 'sine', 0.18);
+        }
       }
       setTimeout(function(){
         if(goalImgEl){ goalImgEl.src = c.goalSafeImg; }
         carEl.classList.add('win');
+        carEl.classList.remove('siren');
         var isLast = stageIndex >= c.stages.length-1;
         bubbleEl.textContent = isLast ? 'すごい！ ぜんぶ クリア できたね！' : c.winPostText;
         nextBtn.hidden = isLast;
         replayBtn.textContent = isLast ? 'さいしょから あそぶ🎉' : 'もういちど あそぶ🎉';
+        if(c.winEffect === 'siren'){
+          badgePopupEl.classList.add('show');
+          setTimeout(function(){ badgePopupEl.classList.remove('show'); }, 1800);
+        }
         winPanelEl.classList.add('show');
         if(typeof playCelebrationSound === 'function') playCelebrationSound();
         spawnStars && spawnStars(3);
@@ -2676,11 +2891,11 @@
       var el = document.createElement('div');
       el.className = 'maze-effect ' + type;
       el.textContent = EFFECT_EMOJI[type] || '💥';
-      var step = 100/GRID_SIZE;
-      el.style.width = step + '%';
-      el.style.height = step + '%';
-      el.style.left = (c * step) + '%';
-      el.style.top = (r * step) + '%';
+      var stepX = 100/GRID_COLS, stepY = 100/GRID_ROWS;
+      el.style.width = stepX + '%';
+      el.style.height = stepY + '%';
+      el.style.left = (c * stepX) + '%';
+      el.style.top = (r * stepY) + '%';
       boardWrapEl.appendChild(el);
       setTimeout(function(){ el.remove(); }, 750);
     }
@@ -2695,6 +2910,17 @@
       }
     }
 
+    var TRAP_MESSAGE = {
+      barricade:'あー！ バリケードだ！ さいしょから！', puddle:'あー！ みずたまりだ！ さいしょから！',
+      cone:'あー！ コーンだ！ さいしょから！', fallenTree:'あー！ たおれた きだ！ さいしょから！',
+      trafficjam:'あー！ じゅうたいだ！ さいしょから！'
+    };
+    function resetToStart(){
+      pos = { r: START[0], c: START[1] };
+      history = [];
+      placeCar(false);
+      bubbleEl.textContent = 'やじるしで すすもう！';
+    }
     function hitTrap(nr, nc, type){
       locked = true;
       ensureAudio();
@@ -2702,40 +2928,77 @@
       showEffect(nr, nc, type);
       playTrapSound(type);
       screenEl.classList.remove('shake'); void screenEl.offsetWidth; screenEl.classList.add('shake');
-      bubbleEl.textContent = type === 'puddle' ? 'あー！ みずたまりだ！ さいしょから！' : 'あー！ バリケードだ！ さいしょから！';
+      bubbleEl.textContent = TRAP_MESSAGE[type] || 'あー！ さいしょから！';
       setTimeout(function(){
-        pos = { r: START[0], c: START[1] };
-        history = [];
-        placeCar(false);
-        bubbleEl.textContent = 'やじるしで すすもう！';
+        resetToStart();
         setControlsEnabled(true);
         locked = false;
       }, 700);
     }
 
-    // Riding onto the rotating bridge: land on it, spin, then automatically
-    // continue out the OTHER trail direction (often not the one you pressed).
-    function crossBridge(arrivedFromKey){
+    // Riding onto either warp-tunnel cell: instantly (deterministically)
+    // teleports to its fixed paired cell - no randomness, always the same
+    // other end.
+    function crossWarp(otherKey){
       locked = true;
       setControlsEnabled(false);
       beep(520, 0.1, 0, 'triangle', 0.16);
+      beep(760, 0.12, 0.08, 'triangle', 0.16);
       setTimeout(function(){
         carEl.classList.remove('spin'); void carEl.offsetWidth; carEl.classList.add('spin');
-        beep(300, 0.12, 0, 'sawtooth', 0.16);
-        beep(500, 0.12, 0.1, 'sawtooth', 0.16);
-        beep(700, 0.14, 0.2, 'sawtooth', 0.16);
-        bubbleEl.textContent = 'ぐるぐる〜！ どっちに でるかな？';
+        bubbleEl.textContent = 'ワープ！';
+        var ep = otherKey.split(',');
+        pos = { r: +ep[0], c: +ep[1] };
+        placeCar(true);
         setTimeout(function(){
-          var exitKey = (arrivedFromKey === bridgeExits.a) ? bridgeExits.b : bridgeExits.a;
-          var ep = exitKey.split(',');
-          pos = { r: +ep[0], c: +ep[1] };
-          placeCar(true);
           bubbleEl.textContent = 'やじるしで すすもう！';
           locked = false;
           setControlsEnabled(true);
           if(isGoal()){ setTimeout(celebrate, 320); }
-        }, 550);
-      }, 350);
+        }, 400);
+      }, 250);
+    }
+
+    function clearGimmickTimers(){
+      gimmickTimers.forEach(function(id){ clearInterval(id); });
+      gimmickTimers = [];
+    }
+    function paintLight(){
+      if(!lightCellEl || !lightDotEl) return;
+      lightDotEl.className = 'maze-gimmick-dot ' + (lightState === 'red' ? 'red' : 'green');
+      lightCellEl.classList.toggle('gimmick-blocked', lightState === 'red');
+    }
+    function paintGate(){
+      if(!gateCellEl) return;
+      gateCellEl.classList.toggle('gimmick-blocked', !gateOpen);
+    }
+    function startGimmickTimers(){
+      clearGimmickTimers();
+      if(lightCell){
+        paintLight();
+        gimmickTimers.push(setInterval(function(){
+          lightState = lightState === 'red' ? 'green' : 'red';
+          paintLight();
+        }, 1800));
+      }
+      if(gateCell) paintGate();
+    }
+
+    // Returns a message string if the gimmick at nk currently blocks entry,
+    // or null if it's fine to proceed (also handles the switch's side effect
+    // of flipping its linked gate open the moment you step on it).
+    function checkGimmickBlock(nk){
+      if(nk === lightCell && lightState === 'red') return 'あかしんごうだよ！ まってね';
+      if(nk === gateCell && !gateOpen) return 'ゲートが しまってるよ！ スイッチを さがそう';
+      return null;
+    }
+    function onEnterSwitch(nk){
+      if(nk === switchCell){
+        gateOpen = !gateOpen;
+        paintGate();
+        beep(700, 0.1, 0, 'square', 0.16);
+        beep(900, 0.12, 0.08, 'square', 0.16);
+      }
     }
 
     function tryMove(dr,dc,bx,by){
@@ -2749,6 +3012,18 @@
       var curKey = key(pos.r,pos.c), nk = key(nr,nc);
       if(!edgeSet.has(edgeKey(curKey,nk))){
         bump(bx,by);
+        if(cfg() && cfg().traceControl){
+          bubbleEl.textContent = 'せんから はずれたよ！';
+          setTimeout(function(){ if(!won && !locked) bubbleEl.textContent = 'ゆびで なぞって すすもう！'; }, 1000);
+        }
+        return;
+      }
+      var blockMsg = checkGimmickBlock(nk);
+      if(blockMsg){
+        bump(bx,by);
+        bubbleEl.textContent = blockMsg;
+        var defaultMsg = cfg() && cfg().traceControl ? 'ゆびで なぞって すすもう！' : 'やじるしで すすもう！';
+        setTimeout(function(){ if(!won && !locked) bubbleEl.textContent = defaultMsg; }, 1100);
         return;
       }
       if(trapCells[nk]){
@@ -2758,8 +3033,9 @@
       history.push({ r: pos.r, c: pos.c });
       pos = { r: nr, c: nc };
       placeCar(true);
-      if(nk === bridgeCell){
-        crossBridge(curKey);
+      onEnterSwitch(nk);
+      if(nk === warpCellA || nk === warpCellB){
+        crossWarp(nk === warpCellA ? warpCellB : warpCellA);
         return;
       }
       beep(520, 0.1, 0, 'triangle', 0.16);
@@ -2811,6 +3087,14 @@
       while(visited[step] !== startK && visited[step] !== null){ step = visited[step]; }
       var stepParts = step.split(','); var sr = +stepParts[0], sc = +stepParts[1];
       var dr = sr - pos.r, dc = sc - pos.c;
+      if(cfg() && cfg().traceControl){
+        var targetCell = boardEl.querySelector('[data-r="'+sr+'"][data-c="'+sc+'"]');
+        if(targetCell){
+          targetCell.classList.remove('hint-glow'); void targetCell.offsetWidth; targetCell.classList.add('hint-glow');
+          setTimeout(function(){ targetCell.classList.remove('hint-glow'); }, 1600);
+        }
+        return;
+      }
       var btn = dr < 0 ? upBtn : (dr > 0 ? downBtn : (dc > 0 ? rightBtn : (dc < 0 ? leftBtn : null)));
       if(btn){
         btn.classList.remove('hint-glow'); void btn.offsetWidth; btn.classList.add('hint-glow');
@@ -2824,6 +3108,39 @@
     rightBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); tryMove(0,1,8,0); });
     undoBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); undo(); });
     hintBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); hint(); });
+
+    // Advanced tier: trace the road with a finger/pointer instead of tapping
+    // arrows. Each move event checks whether the cell under the pointer is
+    // grid-adjacent to the car's current cell and routes it through the same
+    // tryMove() rules (gimmicks, traps, warp, goal) that the buttons use.
+    var tracing = false;
+    function cellFromPoint(clientX, clientY){
+      var el = document.elementFromPoint(clientX, clientY);
+      var cellEl = el && el.closest ? el.closest('.maze-cell') : null;
+      if(!cellEl || cellEl.dataset.r === undefined) return null;
+      return { r: +cellEl.dataset.r, c: +cellEl.dataset.c };
+    }
+    function traceTo(cellPos){
+      if(won || locked || !cellPos) return;
+      var dr = cellPos.r - pos.r, dc = cellPos.c - pos.c;
+      if(dr === 0 && dc === 0) return;
+      if(Math.abs(dr) + Math.abs(dc) !== 1) return; // finger jumped more than one cell - ignore
+      tryMove(dr, dc, dc*8, dr*8);
+    }
+    boardWrapEl.addEventListener('pointerdown', function(e){
+      if(!cfg() || !cfg().traceControl) return;
+      e.stopPropagation();
+      ensureAudio();
+      tracing = true;
+      traceTo(cellFromPoint(e.clientX, e.clientY));
+    });
+    boardWrapEl.addEventListener('pointermove', function(e){
+      if(!tracing || !cfg() || !cfg().traceControl) return;
+      traceTo(cellFromPoint(e.clientX, e.clientY));
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(function(evt){
+      boardWrapEl.addEventListener(evt, function(){ tracing = false; });
+    });
     replayBtn.addEventListener('pointerdown', function(e){
       e.stopPropagation();
       if(stageIndex >= cfg().stages.length-1 && won){ stageIndex = 0; }
@@ -2844,11 +3161,19 @@
       e.stopPropagation();
       if(playAreaEl.style.display !== 'none'){
         // mid-game -> back to this game's difficulty select
+        clearGimmickTimers();
         diffSelectEl.style.display = '';
         playAreaEl.style.display = 'none';
       } else {
         showScreen('menu');
       }
+    });
+    resetBtn.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      if(won || locked) return;
+      ensureAudio();
+      resetToStart();
+      beep(360, 0.1, 0, 'triangle', 0.14);
     });
 
     function startStage(){
@@ -2857,31 +3182,42 @@
       history = [];
       won = false;
       locked = false;
+      lightCellEl = null; lightDotEl = null; gateCellEl = null;
       var c = cfg();
       stageBadgeEl.textContent = 'ステージ ' + (stageIndex+1) + ' / ' + c.stages.length + '（' + c.label + '）';
-      bubbleEl.textContent = 'やじるしで すすもう！';
+      bubbleEl.textContent = c.traceControl ? 'ゆびで なぞって すすもう！' : 'やじるしで すすもう！';
       winPanelEl.classList.remove('show');
       carEl.classList.remove('win');
       setControlsEnabled(true);
       buildBoard();
       placeCar(false);
+      startGimmickTimers();
     }
 
     function startMode(mode){
       currentMode = mode;
       var c = cfg();
-      GRID_SIZE = c.gridSize;
+      GRID_ROWS = c.gridRows; GRID_COLS = c.gridCols;
+      boardWrapEl.style.aspectRatio = c.gridCols + ' / ' + c.gridRows;
+      // Non-square grids (advanced) would otherwise inherit the square cap's
+      // width and grow far too tall - scale the width cap down to match.
+      var maxW = Math.round(360 * Math.min(1, c.gridCols / c.gridRows));
+      boardWrapEl.style.width = 'min(84vw,' + maxW + 'px)';
       stageIndex = 0;
       screenEl.style.backgroundImage = "url('" + c.bgImg + "')";
       carImgEl.src = c.carImg;
       carImgEl.alt = c.carAlt;
       diffSelectEl.style.display = 'none';
       playAreaEl.style.display = '';
+      dpadEl.classList.toggle('hidden', !!c.traceControl);
+      undoBtn.classList.toggle('hidden', !!c.traceControl);
+      resetBtn.hidden = !c.traceControl;
       startStage();
     }
 
     window.resetMazeGame = function(){
       // entering the maze screen from the menu always starts at the difficulty select
+      clearGimmickTimers();
       diffSelectEl.style.display = '';
       playAreaEl.style.display = 'none';
     };

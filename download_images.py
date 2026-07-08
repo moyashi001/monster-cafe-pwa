@@ -182,6 +182,16 @@ def build_image_manifest():
     # as opaque per-cell background images; the rest are isolated icons that
     # make_maze_icons_transparent() below cuts out to transparent PNGs so they
     # can sit on top of the tiles and the town/grass scene background.
+    #
+    # ICON_STYLE keeps every maze icon dead simple and unambiguous for a
+    # 4-year-old: one bold, instantly-readable silhouette per icon, no fussy
+    # detail that gets lost at small board-cell sizes.
+    ICON_STYLE = (
+        ", extremely simple flat icon, single bold clearly recognizable shape, "
+        "minimal detail, very thick black outline, bright saturated colors, "
+        "picture-book illustration style for a young child, centered composition, "
+        "isolated on plain white background, no shadow, no scenery, no text"
+    )
     images["maze_bg.png"] = (
         "a cheerful pop art bird's-eye view of a small town with green grassy fields, "
         "a few colorful houses and trees scattered around, simple flat shapes, no grid, no road, no characters"
@@ -194,56 +204,37 @@ def build_image_manifest():
         "a single top-down square grassy meadow tile texture with a few small flowers and leaf details, "
         "flat simple design, seamless, no cars, no scenery"
     )
-    images["maze_car.png"] = (
-        "a cute simple red fire truck icon, top-down view, bold thick black outline, "
-        "isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_goal.png"] = (
-        "a cute cartoon small building on fire with bright orange flames on the roof, bold thick black outline, "
-        "isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_obstacle_barricade.png"] = (
-        "a cute cartoon orange and white striped road barricade traffic barrier, bold thick black outline, "
-        "isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_obstacle_puddle.png"] = (
-        "a cute cartoon blue water puddle splash with small droplets, bold thick black outline, "
-        "isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_start_station.png"] = (
-        "a cute cartoon red fire station building with a big garage door and a small tower, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_goal_safe.png"] = (
-        "a cute cartoon small building, safe and calm, freshly rescued, no fire, no smoke, tidy and bright, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
-    )
+    images["maze_car.png"] = "a simple red fire truck, top-down view" + ICON_STYLE
+    images["maze_goal.png"] = "a small house with big bright orange flames on the roof" + ICON_STYLE
+    images["maze_obstacle_barricade.png"] = "an orange and white striped road barricade" + ICON_STYLE
+    images["maze_obstacle_puddle.png"] = "a round blue water puddle with a few small droplets" + ICON_STYLE
+    images["maze_start_station.png"] = "a red fire station building with one big garage door" + ICON_STYLE
+    images["maze_goal_safe.png"] = "a small tidy house, safe and bright, no fire, no smoke" + ICON_STYLE
 
     # 8) maze game intermediate tier (police theme, 5x5 grid)
     images["maze_bg_intermediate.png"] = (
         "A 2D children's maze game, 5x5 grid, police car start, police station goal, pastel town background, "
         "playful style, no grid lines, no characters"
     )
-    images["maze_car_police.png"] = (
-        "a cute simple black and white police car icon with a light bar on the roof, top-down view, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
+    images["maze_car_police.png"] = "a simple black and white police car with one roof light bar, top-down view" + ICON_STYLE
+    images["maze_start_police.png"] = "a police station building with one blue lamp sign" + ICON_STYLE
+    images["maze_goal_thief.png"] = "a sneaky thief character in a striped shirt and eye mask, holding a round money bag" + ICON_STYLE
+    images["maze_goal_thief_caught.png"] = "a thief character wearing handcuffs, sitting down, striped shirt and eye mask" + ICON_STYLE
+    images["maze_warp.png"] = "a round colorful spiral swirl portal" + ICON_STYLE
+
+    # 9) maze game advanced tier ("machi no hero" - fire truck, 7x7 grid, finger-trace controls)
+    images["maze_bg_advanced.png"] = (
+        "A 2D children's advanced maze game screen, top-down view, winding roads through a pastel town, "
+        "small obstacles like cones and fallen trees along the streets, bright and playful style, "
+        "no grid lines, no characters, no text"
     )
-    images["maze_start_police.png"] = (
-        "a cute cartoon police station building with a blue lamp sign and small tower, bold thick black outline, "
-        "isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_goal_thief.png"] = (
-        "a cute cartoon sneaky thief character wearing a striped shirt and eye mask, holding a money bag, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_goal_thief_caught.png"] = (
-        "a cute cartoon thief character wearing handcuffs, sitting sad but safe, striped shirt and eye mask, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
-    )
-    images["maze_bridge.png"] = (
-        "a cute cartoon spinning turntable bridge icon with curved arrows showing rotation, "
-        "bold thick black outline, isolated on plain white background, no shadow, no scenery"
-    )
+    images["maze_obstacle_cone.png"] = "one single orange and white traffic safety cone" + ICON_STYLE
+    images["maze_obstacle_fallen_tree.png"] = "one fallen brown tree log lying down, with a couple of green leaves" + ICON_STYLE
+    images["maze_obstacle_trafficjam.png"] = "two small cars bumper to bumper, stuck in traffic" + ICON_STYLE
+    images["maze_gimmick_light.png"] = "a simple traffic light pole with one red circle and one green circle" + ICON_STYLE
+    images["maze_gimmick_switch.png"] = "a round yellow button switch on the ground" + ICON_STYLE
+    images["maze_gimmick_gate.png"] = "a red and white striped road gate barrier arm, straight bar shape" + ICON_STYLE
+    images["maze_badge_hero.png"] = "a round gold medal with a single star" + ICON_STYLE
 
     return images
 
@@ -331,7 +322,14 @@ MAZE_ICON_FILES = [
     "maze_start_police.png",
     "maze_goal_thief.png",
     "maze_goal_thief_caught.png",
-    "maze_bridge.png",
+    "maze_warp.png",
+    "maze_obstacle_cone.png",
+    "maze_obstacle_fallen_tree.png",
+    "maze_obstacle_trafficjam.png",
+    "maze_gimmick_light.png",
+    "maze_gimmick_switch.png",
+    "maze_gimmick_gate.png",
+    "maze_badge_hero.png",
 ]
 
 
