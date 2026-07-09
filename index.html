@@ -517,7 +517,14 @@
   }
   #mazeBoardWrap{
     position:relative; width:min(84vw,360px); aspect-ratio:1/1;
+    /* touch-action:none stops the browser's own scroll/zoom gestures from
+       eating the drag; user-select/user-drag stop a mouse-drag on one of the
+       cell icons from starting a native "ghost image" drag instead of firing
+       our pointermove-based tracing (desktop-mouse only - touch doesn't
+       trigger native image drag, so this had no effect on phones). */
+    touch-action:none; -webkit-user-select:none; user-select:none;
   }
+  #mazeBoardWrap img{ -webkit-user-drag:none; user-drag:none; }
   #mazeBoard{
     position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(4,minmax(0,1fr));
     gap:clamp(3px,1vw,6px); border-radius:18px; background:rgba(255,255,255,.5); padding:clamp(4px,1.2vw,8px);
@@ -537,11 +544,11 @@
   }
   .maze-fence.v{ width:6px; }
   .maze-fence.h{ height:6px; }
-  .maze-cell.goal, .maze-cell.start{ overflow:visible; z-index:8; }
+  .maze-cell.goal, .maze-cell.start{ z-index:8; }
   .maze-cell.goal{ box-shadow:inset 0 0 0 5px var(--red); animation:mazePopGlow 1s ease-in-out infinite; --glow-color:192,57,43; }
   .maze-cell.start{ box-shadow:inset 0 0 0 5px #2e9e4f; animation:mazePopGlow 1s ease-in-out infinite; --glow-color:46,158,79; }
   .maze-cell.goal::before, .maze-cell.start::before{
-    content:''; position:absolute; inset:-10%; border-radius:50%; z-index:-1;
+    content:''; position:absolute; inset:6%; border-radius:50%; z-index:-1;
     background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 55%, rgba(255,255,255,0) 78%);
   }
   @keyframes mazePopGlow{
@@ -549,7 +556,7 @@
     50%{ box-shadow:inset 0 0 0 7px rgba(var(--glow-color),1), 0 0 28px 8px rgba(var(--glow-color),.9); }
   }
   .maze-cell-label{
-    position:absolute; top:-16px; left:50%; transform:translateX(-50%); z-index:9;
+    position:absolute; top:2%; left:50%; transform:translateX(-50%); z-index:9;
     font-size:clamp(9px,2.6vw,12px); font-weight:900; color:#fff; -webkit-text-stroke:2px rgba(0,0,0,.35);
     white-space:nowrap; line-height:1.4;
   }
@@ -562,18 +569,18 @@
   }
   .maze-cell.goal .maze-cell-label{ color:#fff; background:var(--red); }
   .maze-cell.start .maze-cell-label{ color:#fff; background:#2e9e4f; }
-  .maze-gimmick-label{ font-size:clamp(7px,2vw,9px); top:-9px; }
+  .maze-gimmick-label{ font-size:clamp(7px,2vw,9px); top:2%; }
   .maze-cell.gimmick-warp .maze-gimmick-label{ color:#d8c6ff; }
   .maze-cell.gimmick-light .maze-gimmick-label{ color:#ffe9b0; }
   .maze-cell.gimmick-switch .maze-gimmick-label{ color:#fff6c9; }
   .maze-cell.gimmick-gate .maze-gimmick-label{ color:#c6e0ff; }
   .maze-cell img.maze-cell-icon{ width:88%; height:88%; object-fit:contain; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
   .maze-cell.goal img.maze-cell-icon, .maze-cell.start img.maze-cell-icon{
-    width:152%; height:152%; animation:mazePopBounce 1s ease-in-out infinite;
+    width:90%; height:90%; animation:mazePopBounce 1s ease-in-out infinite;
   }
   @keyframes mazePopBounce{
     0%,100%{ transform:translateY(0) scale(1); }
-    50%{ transform:translateY(-6%) scale(1.06); }
+    50%{ transform:translateY(-3%) scale(1.06); }
   }
   .maze-effect{
     position:absolute; width:25%; height:25%; z-index:30; pointer-events:none;
@@ -608,7 +615,7 @@
      #mazeBoard) paint on top of them and hide their icon entirely. */
   .maze-cell.gimmick-warp, .maze-cell.gimmick-light,
   .maze-cell.gimmick-switch, .maze-cell.gimmick-gate, .maze-cell.has-icon{
-    overflow:visible; z-index:5;
+    z-index:5;
   }
   .maze-cell.gimmick-warp{ box-shadow:inset 0 0 0 3px #7a4fd6, 0 0 10px 2px rgba(122,79,214,.7); }
   .maze-cell.gimmick-light{ box-shadow:inset 0 0 0 3px #e2a637, 0 0 10px 2px rgba(226,166,55,.7); }
@@ -617,7 +624,7 @@
   .maze-cell.gimmick-warp img.maze-cell-icon, .maze-cell.gimmick-light img.maze-cell-icon,
   .maze-cell.gimmick-switch img.maze-cell-icon,
   .maze-cell.gimmick-gate img.maze-cell-icon{
-    width:108%; height:108%;
+    width:90%; height:90%;
   }
   .maze-cell.gimmick-warp.warp-b img.maze-cell-icon{ filter:hue-rotate(140deg); }
   #mazeCar.spin{ animation:mazeCarSpin .55s ease-in-out; }
@@ -755,7 +762,7 @@
         <img class="home-card-img" src="assets/images/btn_seal.png" alt="シール ちょう">
       </button>
     </div>
-    <div id="app-version">v2.1.0</div>
+    <div id="app-version">v2.1.1</div>
   </div>
 
   <!-- ================= GAME 1: COUNTING ================= -->
@@ -2477,6 +2484,10 @@
     var edgeSet = null;    // Set of canonical "r,c|r,c" strings: legal moves between adjacent cells
     var trapCells = null;  // {"r,c": "barricade"|"puddle"}
     var pathEdgePairs = null; // [["r,c","r,c"], ...] consecutive solution-path links, for connector bridges
+    var cellEls = {};      // "r,c" -> the actual .maze-cell div, so car/effect placement can be
+                            // measured from real rendered rects instead of naive percentage math
+                            // (the grid has gap/padding, so N * 100/GRID_COLS drifts from the true
+                            // cell position more and more the further from the top-left corner).
     var warpCellA = null, warpCellB = null; // "r,c" fixed pair of warp-tunnel cells, or null if this mode has none
     var lightCell = null, lightState = 'green';       // traffic light gate: 'red' blocks, 'green' passes
     var switchCell = null, gateCell = null, gateOpen = false; // pressure switch toggles the linked gate
@@ -2688,7 +2699,7 @@
       boardEl.style.gridTemplateRows = 'repeat(' + GRID_ROWS + ',minmax(0,1fr))';
       boardEl.innerHTML = '';
       var startKey = key(START[0],START[1]), goalKey = key(GOAL[0],GOAL[1]);
-      var cellEls = {};
+      cellEls = {};
       for(var r=0;r<GRID_ROWS;r++){
         for(var c=0;c<GRID_COLS;c++){
           var cell = document.createElement('div');
@@ -2828,13 +2839,32 @@
       }
     }
 
+    // Converts a cell's real rendered box (which includes the grid's gap and
+    // padding, unlike naive "r/c * 100/GRID_ROWS/COLS" percentage math) into a
+    // position/size relative to #mazeBoardWrap, in percent so it keeps
+    // tracking correctly if the wrap is later resized.
+    function cellBoxPct(r, c){
+      var cellEl = cellEls[key(r,c)];
+      var wrapRect = boardWrapEl.getBoundingClientRect();
+      if(!cellEl || !wrapRect.width || !wrapRect.height){
+        var stepX = 100/GRID_COLS, stepY = 100/GRID_ROWS;
+        return { left: c*stepX, top: r*stepY, width: stepX, height: stepY };
+      }
+      var cr = cellEl.getBoundingClientRect();
+      return {
+        left: (cr.left - wrapRect.left) / wrapRect.width * 100,
+        top: (cr.top - wrapRect.top) / wrapRect.height * 100,
+        width: cr.width / wrapRect.width * 100,
+        height: cr.height / wrapRect.height * 100
+      };
+    }
     function placeCar(animate){
       carEl.style.transition = animate ? '' : 'none';
-      var stepX = 100/GRID_COLS, stepY = 100/GRID_ROWS;
-      carEl.style.width = stepX + '%';
-      carEl.style.height = stepY + '%';
-      carEl.style.left = (pos.c * stepX) + '%';
-      carEl.style.top = (pos.r * stepY) + '%';
+      var box = cellBoxPct(pos.r, pos.c);
+      carEl.style.width = box.width + '%';
+      carEl.style.height = box.height + '%';
+      carEl.style.left = box.left + '%';
+      carEl.style.top = box.top + '%';
       if(!animate){ void carEl.offsetWidth; carEl.style.transition = ''; }
     }
 
@@ -2891,11 +2921,11 @@
       var el = document.createElement('div');
       el.className = 'maze-effect ' + type;
       el.textContent = EFFECT_EMOJI[type] || '💥';
-      var stepX = 100/GRID_COLS, stepY = 100/GRID_ROWS;
-      el.style.width = stepX + '%';
-      el.style.height = stepY + '%';
-      el.style.left = (c * stepX) + '%';
-      el.style.top = (r * stepY) + '%';
+      var box = cellBoxPct(r, c);
+      el.style.width = box.width + '%';
+      el.style.height = box.height + '%';
+      el.style.left = box.left + '%';
+      el.style.top = box.top + '%';
       boardWrapEl.appendChild(el);
       setTimeout(function(){ el.remove(); }, 750);
     }
@@ -3120,6 +3150,20 @@
       if(!cellEl || cellEl.dataset.r === undefined) return null;
       return { r: +cellEl.dataset.r, c: +cellEl.dataset.c };
     }
+    // A fingertip covers roughly one cell's worth of screen, hiding exactly
+    // the spot being dragged through. Sampling a bit above the raw touch
+    // point (not just visually, but for the actual hit-test) keeps the road
+    // ahead of the finger visible instead of hidden underneath it. A mouse
+    // cursor doesn't cover anything, so this offset only applies to
+    // touch/pen input - applying it to a mouse made every press register as
+    // if it landed one cell above the actual cursor, moving "up" no matter
+    // where you clicked.
+    function fingerYOffset(pointerType){
+      if(pointerType === 'mouse') return 0;
+      var rect = boardWrapEl.getBoundingClientRect();
+      var cellH = rect.height / (GRID_ROWS || 1);
+      return Math.max(26, Math.min(60, cellH * 0.65));
+    }
     function traceTo(cellPos){
       if(won || locked || !cellPos) return;
       var dr = cellPos.r - pos.r, dc = cellPos.c - pos.c;
@@ -3127,16 +3171,18 @@
       if(Math.abs(dr) + Math.abs(dc) !== 1) return; // finger jumped more than one cell - ignore
       tryMove(dr, dc, dc*8, dr*8);
     }
+    boardWrapEl.addEventListener('dragstart', function(e){ e.preventDefault(); });
     boardWrapEl.addEventListener('pointerdown', function(e){
       if(!cfg() || !cfg().traceControl) return;
       e.stopPropagation();
+      e.preventDefault();
       ensureAudio();
       tracing = true;
-      traceTo(cellFromPoint(e.clientX, e.clientY));
+      traceTo(cellFromPoint(e.clientX, e.clientY - fingerYOffset(e.pointerType)));
     });
     boardWrapEl.addEventListener('pointermove', function(e){
       if(!tracing || !cfg() || !cfg().traceControl) return;
-      traceTo(cellFromPoint(e.clientX, e.clientY));
+      traceTo(cellFromPoint(e.clientX, e.clientY - fingerYOffset(e.pointerType)));
     });
     ['pointerup','pointercancel','pointerleave'].forEach(function(evt){
       boardWrapEl.addEventListener(evt, function(){ tracing = false; });
@@ -3194,15 +3240,52 @@
       startGimmickTimers();
     }
 
+    // Sizes #mazeBoardWrap to actually fill the space left over once the
+    // topbar/title/bubble/controls have taken their share, instead of the old
+    // fixed "84vw capped at 360px" box - that left large, unused margins on
+    // most screens (worst on the tall advanced grid, which shrank the width
+    // cap even further to keep its aspect ratio). Measuring the real
+    // in-page layout means the board grows to fill whatever room is
+    // actually free, on any screen size.
+    // Synchronous on purpose: buildBoard()/placeCar() run right after this
+    // (in the same call stack, via startStage()) and need the wrap's FINAL
+    // width already applied. An earlier version deferred this to
+    // requestAnimationFrame, so buildBoard()'s connectors/fences (which bake
+    // in fixed pixel positions measured at call time) got laid out against
+    // the stale pre-resize width, then never moved once the real resize
+    // landed a frame later - drifting visibly out of sync with the actual
+    // (now differently-sized) cells. Reading layout below forces the browser
+    // to flush any pending style changes first, so this is safe to call
+    // synchronously right after toggling playAreaEl visible.
+    function sizeBoardWrap(){
+      var c = cfg();
+      var bodyRect = playAreaEl.getBoundingClientRect();
+      var bodyStyle = getComputedStyle(playAreaEl);
+      var gap = parseFloat(bodyStyle.rowGap || bodyStyle.gap) || 0;
+      var bubbleH = bubbleEl.getBoundingClientRect().height;
+      var controlsH = document.getElementById('mazeControls').getBoundingClientRect().height;
+      var availH = bodyRect.height - bubbleH - controlsH - gap * 2;
+      var availW = bodyRect.width;
+      var cellFromH = availH / c.gridRows;
+      var cellFromW = availW / c.gridCols;
+      var cellPx = Math.max(20, Math.min(cellFromH, cellFromW));
+      boardWrapEl.style.width = Math.round(cellPx * c.gridCols) + 'px';
+    }
+    window.addEventListener('resize', function(){
+      if(!cfg()) return;
+      sizeBoardWrap();
+      // The board just changed size - connectors/fences (fixed px, baked in
+      // at buildBoard() time) and the car (percentages computed relative to
+      // the old size) both need to be redone against the new dimensions.
+      buildBoard();
+      placeCar(false);
+    });
+
     function startMode(mode){
       currentMode = mode;
       var c = cfg();
       GRID_ROWS = c.gridRows; GRID_COLS = c.gridCols;
       boardWrapEl.style.aspectRatio = c.gridCols + ' / ' + c.gridRows;
-      // Non-square grids (advanced) would otherwise inherit the square cap's
-      // width and grow far too tall - scale the width cap down to match.
-      var maxW = Math.round(360 * Math.min(1, c.gridCols / c.gridRows));
-      boardWrapEl.style.width = 'min(84vw,' + maxW + 'px)';
       stageIndex = 0;
       screenEl.style.backgroundImage = "url('" + c.bgImg + "')";
       carImgEl.src = c.carImg;
@@ -3212,6 +3295,7 @@
       dpadEl.classList.toggle('hidden', !!c.traceControl);
       undoBtn.classList.toggle('hidden', !!c.traceControl);
       resetBtn.hidden = !c.traceControl;
+      sizeBoardWrap();
       startStage();
     }
 

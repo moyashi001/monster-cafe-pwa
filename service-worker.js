@@ -4,7 +4,7 @@
 // file is already cached, serve it instantly; only hit the network for things
 // that aren't cached yet, and cache whatever comes back.
 
-const CACHE_NAME = 'monster-cafe-v23';
+const CACHE_NAME = 'monster-cafe-v24';
 
 const PRECACHE_ASSETS = [
   "./",
